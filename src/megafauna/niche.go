@@ -7,7 +7,7 @@ import (
 )
 
 // Niche is used as the first tiebreaker in herbivore contests.  A Niche will be *one* of these: Size, 
-// a player color (Dentition), or a DNA letter.
+// a player color (Dentition), or a DNA letter.  Use MakeNiche to make a new niche.
 type Niche struct {
 	Size      bool
 	Dentition int
@@ -18,7 +18,7 @@ type MakeNicheError struct {
 	spec string
 }
 
-func (e *MakeNicheError) Error() string {
+func (e MakeNicheError) Error() string {
 	return fmt.Sprintf("MakeNiche: %v is not a valid niche spec.", e.spec)
 }
 
@@ -38,6 +38,8 @@ func MakeNiche(spec string) (n *Niche, err error) {
 	} 
 	if len(spec) == 1 && strings.Contains("BGHIANMS", spec) {
 		n.DNA = spec
+		return
 	}
 	err = MakeNicheError { spec }
+	return
 }
