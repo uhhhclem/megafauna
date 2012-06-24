@@ -11,8 +11,8 @@ func parse(fileName string) (biomes []Biome, err error) {
 		return nil, err
 	}
 	var message []Biome
-	err2 := json.Unmarshal(b, &message)
-	if err2 != nil {
+	err = json.Unmarshal(b, &message)
+	if err != nil {
 		return nil, err
 	}
 	return message, nil
