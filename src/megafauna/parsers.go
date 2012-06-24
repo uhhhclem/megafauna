@@ -28,7 +28,7 @@ func Parse(fileName string) (biomes []Biome, err error) {
 			Title:        record[0],
 			Subtitle:     record[1],
 			ClimaxNumber: climaxNumber,
-			Requirements: *MakeDNASpec(record[3]),
+			Requirements: MakeDNASpec(record[3]),
 		}
 	}
 	return biomeArray, nil

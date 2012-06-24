@@ -1,6 +1,7 @@
 package megafauna
 
 import (
+	"fmt"
 	"sort" 
 )
 
@@ -27,15 +28,13 @@ type Species struct {
 	Animal
 }
 
-// HerbivoreContest is not very well thought out.  The idea is that in order to figure out who wins in an herbivore
-// contest, you'll build a slice of animals and sort them.  I think the actual solution is going to be more of a
-// score-based mechanic, e.g. add 100 points if the animal matches the biome, add 10 if it matches the niche, and then
-// add the Dentition, and everyone under 100 dies and the winner is the survivor with the highest score.
+// HerbivoreContest is used to determine the winner of herbivore contests during the cull.  Set Animals, Requirements, 
+// and Niche from a Biome containing herbivores, and then call FindWinner to find out who (if anyone) survived.
 type HerbivoreContest struct {
 	Animals      []*Animal
 	Scores	     []int
 	Requirements *DNASpec
-	Niche        Niche
+	Niche        *Niche
 }
 
 // Len is part of the sort.Interface interface.
@@ -70,7 +69,7 @@ func (r Reverse) Less(i, j int) bool {
 // FindWinner assigns scores to the animals in the contest, then sorts in reverse order to
 // find the winner.  It returns nil if there are no animals, or if none is suitable to
 // the Requirements.
-func (h HerbivoreContest) FindWinner() *Animal {
+func (h *HerbivoreContest) FindWinner() *Animal {
 	if len(h.Animals) == 0 {
 		return nil
 	}
@@ -99,8 +98,13 @@ func (h HerbivoreContest) FindWinner() *Animal {
 		h.Scores[i] += animal.Dentition
 	}
 	sort.Sort(Reverse{h})
+	fmt.Printf("Scores are %v\n", h.Scores)
+	// an animal has to have a score of at least 100 to survive; among those, we pick
+	// the one with the highest score.
 	if h.Scores[0] >= 100 {
 		return h.Animals[0]
 	}
+	
+	// nobody has a score of over 100; valar morghulis.
 	return nil
 }

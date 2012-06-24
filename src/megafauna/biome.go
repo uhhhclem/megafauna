@@ -6,9 +6,9 @@ type Biome struct {
 	Title              string
 	Subtitle           string
 	ClimaxNumber       int
-	Requirements       DNASpec
-	Niche              Niche
-	RooterRequirements DNASpec
+	Requirements       *DNASpec
+	Niche              *Niche
+	RooterRequirements *DNASpec
 	Predator           []*Animal
 	Herbivore          []*Animal
 	Rooter             []*Animal
