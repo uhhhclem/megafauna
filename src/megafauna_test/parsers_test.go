@@ -2,8 +2,8 @@ package megafauna_test
 
 import (
 	"megafauna"
-    "testing"
-    "os"
+	"os"
+	"testing"
 )
 
 func TestParseBiome(t *testing.T) {
@@ -18,18 +18,18 @@ func TestParseBiome(t *testing.T) {
 
 func TestEmitBiomes(t *testing.T) {
 	biome1 := megafauna.Biome{
-		Title:	"Test Biome",
-		Subtitle: "This is the subtitle",
+		Title:        "Test Biome",
+		Subtitle:     "This is the subtitle",
 		ClimaxNumber: 1,
 		Requirements: megafauna.DNASpec{
 			Spec: "BBG",
-			Breakdown: map[string] megafauna.DNA {
-				"B": megafauna.DNA {
+			Breakdown: map[string]*megafauna.DNA{
+				"B": *megafauna.DNA{
 					Letter: "B",
-					Value: 0,},
+					Value:  0},
 			},
-		}, 
-		Niche: megafauna.Niche {
+		},
+		Niche: megafauna.Niche{
 			DNA: "P",
 		},
 		/**
@@ -46,5 +46,5 @@ func TestEmitBiomes(t *testing.T) {
 		t.Errorf("An error occured: %v", err)
 	}
 	os.Stdout.Write(jsonBiomes)
-	
+
 }
