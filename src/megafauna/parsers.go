@@ -3,6 +3,7 @@ package megafauna
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 )
 
 func Parse(fileName string) (biomes []Biome, err error) {
@@ -16,4 +17,13 @@ func Parse(fileName string) (biomes []Biome, err error) {
 		return nil, err
 	}
 	return message, nil
+}
+
+func Emit(biomes []Biome) (err error) {
+	b, err := json.MarshalIndent(biomes, "", "  ")
+	if err != nil {
+		return err
+	}
+	os.Stdout.Write(b)
+	return nil
 }

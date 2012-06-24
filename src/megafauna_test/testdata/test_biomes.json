@@ -1,1 +1,24 @@
-{}
+[
+  {
+    "Title": "Test Biome",
+    "Subtitle": "This is the subtitle",
+    "ClimaxNumber": 1,
+    "Requirements": {
+      "Spec": "BBG",
+      "Breakdown": null
+    },
+    "Niche": {
+      "Size": false,
+      "Dentition": 0,
+      "DNA": ""
+    },
+    "RooterRequirements": {
+      "Spec": "",
+      "Breakdown": null
+    },
+    "Predator": null,
+    "Herbivore": null,
+    "Rooter": null,
+    "Habitat": null
+  }
+]
