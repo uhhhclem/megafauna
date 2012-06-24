@@ -1,27 +1,27 @@
 package megafauna
 
 import (
-	"encoding/json"
-	"io/ioutil"
+	"bufio"
+	"encoding/csv"
+	"os"
 )
 
 func Parse(fileName string) (biomes []Biome, err error) {
-	b, err := ioutil.ReadFile(fileName)
+	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
 	}
-	var message []Biome
-	err = json.Unmarshal(b, &message)
+	reader := bufio.NewReader(file)
+	csvReader := csv.NewReader(reader)
+	records, err := csvReader.ReadAll()
 	if err != nil {
 		return nil, err
 	}
-	return message, nil
-}
-
-func Emit(biomes []Biome) (jsonBiomes []byte, err error) {
-	b, err := json.MarshalIndent(biomes, "", "  ")
-	if err != nil {
-		return nil, err
+	biomeArray := make([]Biome, len(records))
+	for key, record := range records {
+		biomeArray[key] = Biome{
+			Title: record[0],
+		}
 	}
-	return b, nil
+	return biomeArray, nil
 }
