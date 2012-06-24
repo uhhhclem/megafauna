@@ -5,12 +5,17 @@
     "ClimaxNumber": 1,
     "Requirements": {
       "Spec": "BBG",
-      "Breakdown": null
+      "Breakdown": {
+        "B": {
+          "Letter": "B",
+          "Value": 0
+        }
+      }
     },
     "Niche": {
       "Size": false,
       "Dentition": 0,
-      "DNA": ""
+      "DNA": "P"
     },
     "RooterRequirements": {
       "Spec": "",
