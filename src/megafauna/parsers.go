@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/csv"
 	"os"
+	"strconv"
 )
 
 func Parse(fileName string) (biomes []Biome, err error) {
@@ -19,8 +20,15 @@ func Parse(fileName string) (biomes []Biome, err error) {
 	}
 	biomeArray := make([]Biome, len(records))
 	for key, record := range records {
+		climaxNumber, err := strconv.Atoi(record[2])
+		if err != nil {
+			return nil, err
+		}
 		biomeArray[key] = Biome{
-			Title: record[0],
+			Title:        record[0],
+			Subtitle:     record[1],
+			ClimaxNumber: climaxNumber,
+			Requirements: *MakeDNASpec(record[3]),
 		}
 	}
 	return biomeArray, nil
