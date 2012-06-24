@@ -8,6 +8,8 @@ type Niche struct {
 	DNA       string
 }
 
+// TODO: build constructor functions for Niches, using assignment to make them is really error-prone 
+
 // Latitude is one of the four latitude bands on the board (Tropic, Horse Latitudes, etc.)
 type Latitude struct {
 	Name    string

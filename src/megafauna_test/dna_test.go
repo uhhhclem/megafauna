@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func testDNA(t *testing.T) {
+func TestDNA(t *testing.T) {
 	var dna megafauna.DNA
 	dna.Letter = "A"
 	if !dna.IsRoadrunner() {
@@ -24,10 +24,9 @@ func testDNA(t *testing.T) {
 
 }
 
-func testMakeDNASpec(t *testing.T) {
-	var spec megafauna.DNASpec
-	spec = megafauna.MakeDNASpec("BBGAAA")
-	if spec.Spec != "BBGGAAA" {
+func TestMakeDNASpec(t *testing.T) {
+	spec := megafauna.MakeDNASpec("BBGAAA")
+	if spec.Spec != "BBGAAA" {
 		t.Errorf("Spec set incorrectly - shouldn't be %v", spec.Spec)
 	}
 
@@ -42,7 +41,7 @@ func testMakeDNASpec(t *testing.T) {
 	}
 }
 
-func testCanPreyOn(t *testing.T) {
+func TestCanPreyOn(t *testing.T) {
 	predators := []string{"BGA", "M", "MM", "INS"}
 
 	prey := []string{"IG", "MGG", "MP", "HHS"}
@@ -64,7 +63,7 @@ func testCanPreyOn(t *testing.T) {
 
 }
 
-func testCanFeedOn(t *testing.T) {
+func TestCanFeedOn(t *testing.T) {
 	eaters := []string{"BGA", "M", "MMP", "INS"}
 
 	food := []string{"BG", "", "MP", "IAA"}

@@ -1,12 +1,15 @@
 package megafauna
 
-import "sort"
+import (
+	"sort" 
+)
+
 
 // Animal can be either an immigrant or a player's species.
 type Animal struct {
 	Dentition int
 	Size      int
-	Genome    DNASpec
+	Genome    *DNASpec
 }
 
 // Immigrant represents an immigrant tile.
@@ -31,7 +34,7 @@ type Species struct {
 type HerbivoreContest struct {
 	Animals      []*Animal
 	Scores	     []int
-	Requirements DNASpec
+	Requirements *DNASpec
 	Niche        Niche
 }
 
@@ -86,12 +89,12 @@ func (h HerbivoreContest) FindWinner() *Animal {
 			if h.Niche.Dentition == animal.Dentition {
 				h.Scores[i] += 10
 			}
-		} else {
+		} else if h.Niche.DNA != "" {
 			_, ok := animal.Genome.Breakdown[h.Niche.DNA]
 			if ok {
 				h.Scores[i] += 10
 			}
-		}
+		} 
 		// and the ones is the animal's dentition
 		h.Scores[i] += animal.Dentition
 	}
