@@ -1,15 +1,5 @@
 package megafauna
 
-// Niche is used as the first tiebreaker in herbivore contests.  A Niche will be *one* of these: Size, 
-// a player color (Dentition), or a DNA letter.
-type Niche struct {
-	Size      bool
-	Dentition int
-	DNA       string
-}
-
-// TODO: build constructor functions for Niches, using assignment to make them is really error-prone 
-
 // Latitude is one of the four latitude bands on the board (Tropic, Horse Latitudes, etc.)
 type Latitude struct {
 	Name    string
