@@ -21,7 +21,7 @@ func testDNA(t *testing.T) {
 	if !dna.IsDietary() {
 		t.Errorf("Expected P to be dietary.")
 	}
-	
+
 }
 
 func testMakeDNASpec(t *testing.T) {
@@ -30,7 +30,7 @@ func testMakeDNASpec(t *testing.T) {
 	if spec.Spec != "BBGGAAA" {
 		t.Errorf("Spec set incorrectly - shouldn't be %v", spec.Spec)
 	}
-	
+
 	if spec.Breakdown["B"].Value != 2 {
 		t.Errorf("Breakdown of B shouldn't be %v.", spec.Breakdown["B"].Value)
 	}
@@ -43,9 +43,9 @@ func testMakeDNASpec(t *testing.T) {
 }
 
 func testCanPreyOn(t *testing.T) {
-	predators := []string { "BGA", "M", "MM", "INS"}
-	
-	prey := []string { "IG", "MGG", "MP", "HHS" }
+	predators := []string{"BGA", "M", "MM", "INS"}
+
+	prey := []string{"IG", "MGG", "MP", "HHS"}
 	for i, _ := range predators {
 		predatorSpec := megafauna.MakeDNASpec(predators[i])
 		preySpec := megafauna.MakeDNASpec(prey[i])
@@ -53,7 +53,7 @@ func testCanPreyOn(t *testing.T) {
 			t.Errorf("%v should be able to prey on %v", predatorSpec.Spec, preySpec.Spec)
 		}
 	}
-	prey = []string { "IGAA", "MSGG", "MN", "A" }
+	prey = []string{"IGAA", "MSGG", "MN", "A"}
 	for i, _ := range predators {
 		predatorSpec := megafauna.MakeDNASpec(predators[i])
 		preySpec := megafauna.MakeDNASpec(prey[i])
@@ -61,13 +61,13 @@ func testCanPreyOn(t *testing.T) {
 			t.Errorf("%v shouldn't be able to prey on %v", predatorSpec.Spec, preySpec.Spec)
 		}
 	}
-	
+
 }
 
 func testCanFeedOn(t *testing.T) {
-	eaters := []string { "BGA", "M", "MMP", "INS"}
-	
-	food := []string { "BG", "", "MP", "IAA" }
+	eaters := []string{"BGA", "M", "MMP", "INS"}
+
+	food := []string{"BG", "", "MP", "IAA"}
 	for i, _ := range eaters {
 		eaterSpec := megafauna.MakeDNASpec(eaters[i])
 		foodSpec := megafauna.MakeDNASpec(food[i])
@@ -76,7 +76,7 @@ func testCanFeedOn(t *testing.T) {
 		}
 	}
 
-	food = []string { "BGG", "H", "MPP", "IIN" }
+	food = []string{"BGG", "H", "MPP", "IIN"}
 	for i, _ := range eaters {
 		eaterSpec := megafauna.MakeDNASpec(eaters[i])
 		foodSpec := megafauna.MakeDNASpec(food[i])

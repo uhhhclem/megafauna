@@ -3,7 +3,7 @@ package megafauna
 // DNA represents a single DNA value, e.g. BB or AAA
 type DNA struct {
 	Letter string
-	Value int
+	Value  int
 }
 
 // IsRoadrunner tells you whether or not this is roadrunner DNA.
@@ -18,7 +18,7 @@ func (d *DNA) IsDietary() bool {
 
 // DNASpec represents a DNA specification, i.e. a genome, or a biome's requirements.
 type DNASpec struct {
-	Spec string // e.g. BBG
+	Spec      string         // e.g. BBG
 	Breakdown map[string]DNA // Spec broken down for ease of comparison
 }
 
@@ -48,8 +48,12 @@ func (d DNASpec) CanPreyOn(other DNASpec) bool {
 	for letter, otherDna := range other.Breakdown {
 		if otherDna.IsRoadrunner() {
 			thisDna, ok := d.Breakdown[letter]
-			if !ok { return false }
-			if thisDna.Value < otherDna.Value { return false }
+			if !ok {
+				return false
+			}
+			if thisDna.Value < otherDna.Value {
+				return false
+			}
 		}
 	}
 	return true
@@ -62,8 +66,12 @@ func (d DNASpec) CanFeedOn(other DNASpec) bool {
 	for letter, otherDna := range other.Breakdown {
 		if otherDna.IsDietary() {
 			thisDna, ok := d.Breakdown[letter]
-			if !ok { return false }
-			if thisDna.Value < otherDna.Value { return false }
+			if !ok {
+				return false
+			}
+			if thisDna.Value < otherDna.Value {
+				return false
+			}
 		}
 	}
 	return true
