@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestHerbivoreContest(t *testing.T) {
+func TestHerbivoreContestBasicTests(t *testing.T) {
 	// animal1 is suited, animal2 is not
 	animal1 := megafauna.Animal { 2, 2, megafauna.MakeDNASpec("BBG")}
 	animal2 := megafauna.Animal { 3, 2, megafauna.MakeDNASpec("IIM")}
