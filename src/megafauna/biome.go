@@ -9,6 +9,8 @@ type Biome struct {
 	Requirements       *DNASpec
 	Niche              *Niche
 	RooterRequirements *DNASpec
+	RedStar            bool
+	BlueStar           bool
 	Predator           []*Animal
 	Herbivore          []*Animal
 	Rooter             []*Animal
