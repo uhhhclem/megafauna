@@ -24,11 +24,16 @@ func Parse(fileName string) (biomes []Biome, err error) {
 		if err != nil {
 			return nil, err
 		}
+		niche, err := MakeNiche(record[4])
+		if err != nil {
+			return nil, err
+		}
 		biomeArray[key] = Biome{
 			Title:        record[0],
 			Subtitle:     record[1],
 			ClimaxNumber: climaxNumber,
 			Requirements: MakeDNASpec(record[3]),
+			Niche: niche,
 		}
 	}
 	return biomeArray, nil
