@@ -1,53 +1,54 @@
 package megafauna
 
 import (
-	"bufio"
 	"encoding/csv"
-	"os"
+	"io"
 	"strconv"
 )
 
-func Parse(fileName string) (biomes []Biome, err error) {
-	file, err := os.Open(fileName)
-	if err != nil {
-		return nil, err
-	}
-	reader := bufio.NewReader(file)
-	csvReader := csv.NewReader(reader)
+// Parseable types implement a Parse method.  I'm not really sure that we need a Parseable interface per se; I
+// can't really think of a useful function that would take a Parseable as an argument.  Maybe there could be 
+// an Init(slices []Parseable, filenames []string) that parsed all of the data at startup. 
+type Parseable interface {
+	Parse(io.Reader) error
+}
+
+// BiomeSlice is a Parseable of *Biomes.
+type BiomeSlice []*Biome
+
+// Parse takes a Reader containing Biome data in CSV format, parses the data into Biomes, and populates
+// the (pre-allocated) slice with the biomes.
+func (biomes BiomeSlice) Parse(r io.Reader) error {
+	csvReader := csv.NewReader(r)
 	records, err := csvReader.ReadAll()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	biomeArray := make([]Biome, len(records))
-	for key, record := range records {
+	for i, record := range records {
+		b := new(Biome)
+		b.Title = record[0]
+		b.Subtitle = record[1]
+		b.ClimaxNumber, err = strconv.Atoi(record[2])
+		if err != nil {
+			return err
+		}
+		b.Requirements = MakeDNASpec(record[3])
+		b.RooterRequirements = MakeDNASpec(record[4])
+		b.Niche, err = MakeNiche(record[5])
+		if err != nil {
+			return err
+		}
+		b.RedStar, err = strconv.ParseBool(record[6])
+		if err != nil {
+			return nil
+		}
+		b.BlueStar, err = strconv.ParseBool(record[7])
+		if err != nil {
+			return err
+		}
 
-		climaxNumber, err := strconv.Atoi(record[2])
-		if err != nil {
-			return nil, err
-		}
-		niche, err := MakeNiche(record[5])
-		if err != nil {
-			return nil, err
-		}
-		RedStar, err := strconv.ParseBool(record[6])
-		if err != nil {
-			return nil, err
-		}
-		BlueStar, err := strconv.ParseBool(record[7])
-		if err != nil {
-			return nil, err
-		}
-
-		biomeArray[key] = Biome{
-			Title:              record[0],
-			Subtitle:           record[1],
-			ClimaxNumber:       climaxNumber,
-			Requirements:       MakeDNASpec(record[3]),
-			Niche:              niche,
-			RooterRequirements: MakeDNASpec(record[4]),
-			RedStar:            RedStar,
-			BlueStar:           BlueStar,
-		}
+		biomes[i] = b
 	}
-	return biomeArray, nil
+	return nil
 }
+
