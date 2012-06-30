@@ -46,7 +46,6 @@ func (biomes BiomeSlice) Parse(r io.Reader) error {
 		if err != nil {
 			return err
 		}
-
 		biomes[i] = b
 	}
 	return nil

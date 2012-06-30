@@ -52,6 +52,7 @@ func TestBiomeSliceParse(t *testing.T) {
 	if !b.BlueStar {
 		t.Errorf("Expected BlueStar to be true, but it's false.")
 	}
-	
-	
+	if b.Niche.DNA != expectedNicheDNA {
+		t.Errorf("Expected Niche.DNA to be %v, but it's %v", expectedNicheDNA, b.Niche.DNA)
+	}
 }
