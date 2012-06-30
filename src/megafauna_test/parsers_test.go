@@ -7,7 +7,7 @@ import (
 )
 
 func TestBiomeSliceParse(t *testing.T) {
-	data := "Variscan orogeny,African Podocarp High Forest,67,B,,SIZE,false,false\nCypressales,Dawn Redwood Forest,40,BBH,,A,false,true"
+	data := "Variscan orogeny,African Podocarp High Forest,67,B,H,SIZE,false,false\nCypressales,Dawn Redwood Forest,40,BBH,,A,false,true"
 
 	biomes := make(megafauna.BiomeSlice, 300)
 
@@ -20,7 +20,12 @@ func TestBiomeSliceParse(t *testing.T) {
 		t.Errorf("Expected some biomes.")
 	}
 	
-	b := biomes[1]
+	b := biomes[0]
+	if b.RooterRequirements.Spec != "H" {
+		t.Errorf("Expected RooterRequirements.Spec to be H, but it's %v", b.RooterRequirements.Spec)
+	}
+	
+	b = biomes[1]
 	expectedTitle := "Cypressales"
 	expectedSubtitle := "Dawn Redwood Forest"
 	expectedClimaxNumber := 40
@@ -55,4 +60,5 @@ func TestBiomeSliceParse(t *testing.T) {
 	if b.Niche.DNA != expectedNicheDNA {
 		t.Errorf("Expected Niche.DNA to be %v, but it's %v", expectedNicheDNA, b.Niche.DNA)
 	}
+	
 }
