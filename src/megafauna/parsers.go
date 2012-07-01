@@ -32,9 +32,10 @@ const (
 	BiomeTileBlueStarField
 )
 
+// BiomeTileParseError is the error returned if one of the key fields in the biome data is invalid.
 type BiomeTileParseError struct {
-	InvalidTypeKey 		string
-	InvalidLatitudeKey	string
+	InvalidTypeKey     string
+	InvalidLatitudeKey string
 }
 
 func (e *BiomeTileParseError) Error() string {
@@ -42,7 +43,7 @@ func (e *BiomeTileParseError) Error() string {
 		return "Type must be one of " + BiomeTypeKeys + " but is " + e.InvalidTypeKey
 	}
 	return "LatitudeKey must be one of " + LatitudeKeys + " but is " + e.InvalidLatitudeKey
-	
+
 }
 
 // Parse takes a Reader containing BiomeTile data in CSV format, parses the data into BiomeTiles, and populates
@@ -57,23 +58,27 @@ func (tiles BiomeTileMap) Parse(r io.Reader) error {
 		b := new(BiomeTile)
 		b.Key = record[BiomeTileKeyField]
 		b.LatitudeKey = record[BiomeTileLatitudeKeyField]
-		
+
 		if len(b.LatitudeKey) != 1 || !strings.Contains(LatitudeKeys, b.LatitudeKey) {
-			return &BiomeTileParseError { "", b.LatitudeKey }
+			return &BiomeTileParseError{"", b.LatitudeKey}
 		}
-		
+
 		switch record[BiomeTileTypeField] {
-			case "L": b.IsLand = true
-			case "W": b.IsWater = true
-			case "O": {
+		case "L":
+			b.IsLand = true
+		case "W":
+			b.IsWater = true
+		case "O":
+			{
 				b.IsLand = true
 				b.IsOrogeny = true
 			}
-			default: {
-				return &BiomeTileParseError { record[BiomeTileTypeField], "" }
+		default:
+			{
+				return &BiomeTileParseError{record[BiomeTileTypeField], ""}
 			}
 		}
-		
+
 		b.Title = record[BiomeTileTitleField]
 		b.Subtitle = record[BiomeTileSubtitleField]
 		b.ClimaxNumber, err = strconv.Atoi(record[BiomeTileClimaxNumberField])

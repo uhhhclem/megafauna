@@ -5,7 +5,7 @@ package megafauna
 type Habitat struct {
 	Latitude         *Latitude
 	ClimaxNumber     int
-	IsOrogeny		 bool
+	IsOrogeny        bool
 	AdjacentHabitats []*Habitat
 	Biome            *Biome
 }

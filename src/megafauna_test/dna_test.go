@@ -39,7 +39,7 @@ func TestMakeDNASpec(t *testing.T) {
 	if spec.Breakdown["A"].Value != 3 {
 		t.Errorf("Breakdown of A shouldn't be %v.", spec.Breakdown["A"].Value)
 	}
-	
+
 	spec = megafauna.MakeDNASpec("")
 	if spec.Spec != "" {
 		t.Error("MakeDNASpec should return Spec=\"\" if it's passed the empty string.")

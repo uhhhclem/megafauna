@@ -2,9 +2,8 @@ package megafauna
 
 import (
 	"fmt"
-	"sort" 
+	"sort"
 )
-
 
 // Animal can be either an immigrant or a player's species.
 type Animal struct {
@@ -32,7 +31,7 @@ type Species struct {
 // and Niche from a Biome containing herbivores, and then call FindWinner to find out who (if anyone) survived.
 type HerbivoreContest struct {
 	Animals      []*Animal
-	Scores	     []int
+	Scores       []int
 	Requirements *DNASpec
 	Niche        *Niche
 }
@@ -56,14 +55,14 @@ func (h HerbivoreContest) Less(i, j int) bool {
 // Reverse embeds a sort.Interface value and implements a reverse sort over
 // that value.
 type Reverse struct {
-    // This embedded Interface permits Reverse to use the methods of
-    // another Interface implementation.
-    sort.Interface
+	// This embedded Interface permits Reverse to use the methods of
+	// another Interface implementation.
+	sort.Interface
 }
 
 // Less returns the opposite of the embedded implementation's Less method.
 func (r Reverse) Less(i, j int) bool {
-    return r.Interface.Less(j, i)
+	return r.Interface.Less(j, i)
 }
 
 // FindWinner assigns scores to the animals in the contest, then sorts in reverse order to
@@ -74,7 +73,7 @@ func (h *HerbivoreContest) FindWinner() *Animal {
 		return nil
 	}
 	h.Scores = make([]int, len(h.Animals))
-	
+
 	// calculate the score for each animal
 	for i, animal := range h.Animals {
 		// suitability score is in the hundreds
@@ -93,7 +92,7 @@ func (h *HerbivoreContest) FindWinner() *Animal {
 			if ok {
 				h.Scores[i] += 10
 			}
-		} 
+		}
 		// and the ones is the animal's dentition
 		h.Scores[i] += animal.Dentition
 	}
@@ -104,7 +103,7 @@ func (h *HerbivoreContest) FindWinner() *Animal {
 	if h.Scores[0] >= 100 {
 		return h.Animals[0]
 	}
-	
+
 	// nobody has a score of over 100; valar morghulis.
 	return nil
 }

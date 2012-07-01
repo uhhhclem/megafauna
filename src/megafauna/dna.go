@@ -20,7 +20,7 @@ func (d *DNA) IsDietary() bool {
 
 // DNASpec represents a DNA specification, i.e. a genome, or a biome's requirements.
 type DNASpec struct {
-	Spec      string         // e.g. BBG
+	Spec      string          // e.g. BBG
 	Breakdown map[string]*DNA // Spec broken down for ease of comparison
 }
 

@@ -7,7 +7,7 @@ const RoadrunnerDNAKeys = "AMNS"
 
 // Latitude is one of the four latitude bands on the board (Tropic, Horse Latitudes, etc.)
 type Latitude struct {
-	Key string
+	Key     string
 	Name    string
 	Habitat []*Habitat
 }
