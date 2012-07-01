@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func TestBiomeMapParse(t *testing.T) {
-	data := "1,Variscan orogeny,African Podocarp High Forest,67,B,,SIZE,false,false\n2,Cypressales,Dawn Redwood Forest,40,BB,H,A,false,true"
+func TestBiomeTileMapParse(t *testing.T) {
+	data := "1,O,O,Variscan orogeny,African Podocarp High Forest,67,B,,SIZE,false,false\n2,T,L,Cypressales,Dawn Redwood Forest,40,BB,H,A,false,true"
 
-	biomes := make(megafauna.BiomeMap)
+	biomes := make(megafauna.BiomeTileMap)
 
 	reader := strings.NewReader(data)
 	err := biomes.Parse(reader)
@@ -20,7 +20,24 @@ func TestBiomeMapParse(t *testing.T) {
 		t.Errorf("Expected some biomes.")
 	}
 	
-	b := biomes["2"]
+	var b *megafauna.BiomeTile
+	
+	b = biomes["1"]
+	if b.LatitudeKey != "O" {
+		t.Errorf("Expected tile 1 to be in the O latitude.")
+	}
+	if !b.IsOrogeny || b.IsWater || !b.IsLand {
+		t.Errorf("Expected tile 1 to be an orogeny tile.")
+	}
+	
+	b = biomes["2"]
+	if b.LatitudeKey != "T" {
+		t.Errorf("Expected tile 2 to be in the T latitude.")
+	}
+	if b.IsOrogeny || b.IsWater || !b.IsLand {
+		t.Errorf("Expected tile 2 to be a land tile.")
+	}
+	
 	expectedTitle := "Cypressales"
 	expectedSubtitle := "Dawn Redwood Forest"
 	expectedClimaxNumber := 40

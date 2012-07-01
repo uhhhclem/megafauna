@@ -4,14 +4,7 @@ package megafauna
 // (possible) animals in its predator, herbivore, and rooter slots.
 type Biome struct {
 	Key				   string
-	Title              string
-	Subtitle           string
-	ClimaxNumber       int
-	Requirements       *DNASpec
-	Niche              *Niche
-	RooterRequirements *DNASpec
-	RedStar            bool
-	BlueStar           bool
+	Tile			   *BiomeTile
 	Predator           []*Animal
 	Herbivore          []*Animal
 	Rooter             []*Animal

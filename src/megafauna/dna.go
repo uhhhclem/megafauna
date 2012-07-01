@@ -2,9 +2,6 @@ package megafauna
 
 import "strings"
 
-const DietaryDNA = "BGHIP"
-const RoadrunnerDNA = "AMNS"
-
 // DNA represents a single DNA value, e.g. BB or AAA
 type DNA struct {
 	Letter string
@@ -13,12 +10,12 @@ type DNA struct {
 
 // IsRoadrunner tells you whether or not this is roadrunner DNA.
 func (d *DNA) IsRoadrunner() bool {
-	return len(d.Letter) == 1 && strings.Contains(RoadrunnerDNA, d.Letter)
+	return len(d.Letter) == 1 && strings.Contains(RoadrunnerDNAKeys, d.Letter)
 }
 
 // IsDietary tells you whether or not this is dietary DNA.
 func (d *DNA) IsDietary() bool {
-	return len(d.Letter) == 1 && strings.Contains(DietaryDNA, d.Letter)
+	return len(d.Letter) == 1 && strings.Contains(DietaryDNAKeys, d.Letter)
 }
 
 // DNASpec represents a DNA specification, i.e. a genome, or a biome's requirements.
