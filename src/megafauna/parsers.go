@@ -13,41 +13,78 @@ type Parseable interface {
 	Parse(io.Reader) error
 }
 
-// BiomeSlice is a Parseable of *Biomes.
-type BiomeSlice []*Biome
+// BiomeMap is a Parseable of *Biomes.
+type BiomeMap map[string]*Biome
+
+// Indices into the CSV file for the Biome fields.
+const (
+	BiomeKeyField = iota
+	BiomeTitleField
+	BiomeSubtitleField
+	BiomeClimaxNumberField
+	BiomeRequirementsField
+	BiomeRooterRequirementsField
+	BiomeNicheField
+	BiomeRedStarField
+	BiomeBlueStarField
+)
 
 // Parse takes a Reader containing Biome data in CSV format, parses the data into Biomes, and populates
-// the (pre-allocated) slice with the biomes.
-func (biomes BiomeSlice) Parse(r io.Reader) error {
+// the (pre-made) map with the biomes.
+func (biomes BiomeMap) Parse(r io.Reader) error {
 	csvReader := csv.NewReader(r)
 	records, err := csvReader.ReadAll()
 	if err != nil {
 		return err
 	}
-	for i, record := range records {
+	for _, record := range records {
 		b := new(Biome)
-		b.Title = record[0]
-		b.Subtitle = record[1]
-		b.ClimaxNumber, err = strconv.Atoi(record[2])
+		b.Key = record[BiomeKeyField]
+		b.Title = record[BiomeTitleField]
+		b.Subtitle = record[BiomeSubtitleField]
+		b.ClimaxNumber, err = strconv.Atoi(record[BiomeClimaxNumberField])
 		if err != nil {
 			return err
 		}
-		b.Requirements = MakeDNASpec(record[3])
-		b.RooterRequirements = MakeDNASpec(record[4])
-		b.Niche, err = MakeNiche(record[5])
+		b.Requirements = MakeDNASpec(record[BiomeRequirementsField])
+		b.RooterRequirements = MakeDNASpec(record[BiomeRooterRequirementsField])
+		b.Niche, err = MakeNiche(record[BiomeNicheField])
 		if err != nil {
 			return err
 		}
-		b.RedStar, err = strconv.ParseBool(record[6])
+		b.RedStar, err = strconv.ParseBool(record[BiomeRedStarField])
 		if err != nil {
 			return nil
 		}
-		b.BlueStar, err = strconv.ParseBool(record[7])
+		b.BlueStar, err = strconv.ParseBool(record[BiomeBlueStarField])
 		if err != nil {
 			return err
 		}
-		biomes[i] = b
+		biomes[b.Key] = b
 	}
 	return nil
 }
 
+// LatitudeMap is a Parseable of Latitudes.
+type LatitudeMap map[string]*Latitude
+
+const (
+	LatitudeKeyField = iota
+	LatitudeNameField
+)
+
+// Parse parses the latitude data in r into a map of Latitude objects.
+func (latitudes LatitudeMap) Parse(r io.Reader) error {
+	csvReader := csv.NewReader(r)
+	records, err := csvReader.ReadAll()
+	if err != nil {
+		return err
+	}
+	for _, record := range records {
+		l := new(Latitude)
+		l.Key = record[LatitudeKeyField]
+		l.Name = record[LatitudeNameField]
+		latitudes[l.Key] = l
+	}
+	return nil
+}

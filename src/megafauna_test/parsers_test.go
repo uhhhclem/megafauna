@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func TestBiomeSliceParse(t *testing.T) {
-	data := "Variscan orogeny,African Podocarp High Forest,67,B,,SIZE,false,false\nCypressales,Dawn Redwood Forest,40,BB,H,A,false,true"
+func TestBiomeMapParse(t *testing.T) {
+	data := "1,Variscan orogeny,African Podocarp High Forest,67,B,,SIZE,false,false\n2,Cypressales,Dawn Redwood Forest,40,BB,H,A,false,true"
 
-	biomes := make(megafauna.BiomeSlice, 300)
+	biomes := make(megafauna.BiomeMap)
 
 	reader := strings.NewReader(data)
 	err := biomes.Parse(reader)
@@ -20,7 +20,7 @@ func TestBiomeSliceParse(t *testing.T) {
 		t.Errorf("Expected some biomes.")
 	}
 	
-	b := biomes[1]
+	b := biomes["2"]
 	expectedTitle := "Cypressales"
 	expectedSubtitle := "Dawn Redwood Forest"
 	expectedClimaxNumber := 40
@@ -55,5 +55,25 @@ func TestBiomeSliceParse(t *testing.T) {
 	if b.Niche.DNA != expectedNicheDNA {
 		t.Errorf("Expected Niche.DNA to be %v, but it's %v", expectedNicheDNA, b.Niche.DNA)
 	}
+}
+
+func TestLatitudeMapParse(t *testing.T) {
+	data := "1,Tropics\n2,Horse Latitudes\n3,Jet Stream\n4,Arctic"
+
+	latitudes := make(megafauna.LatitudeMap)
+
+	reader := strings.NewReader(data)
+	err := latitudes.Parse(reader)
+	if err != nil {
+		t.Errorf("An error occurred: %v", err)
+	}
+	if len(latitudes) == 0 {
+		t.Errorf("Expected some latitudes.")
+	}
 	
+	key := "2"
+	expected := "Horse Latitudes"
+	if latitudes[key].Name != expected {
+		t.Errorf("Expected Latitude with a key of %v to be %v, but it's %v.", key, expected, latitudes[key].Name) 
+	}
 }
