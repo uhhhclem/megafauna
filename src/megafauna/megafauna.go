@@ -4,6 +4,7 @@ import "math/rand"
 
 const BiomeTypeKeys = "LWO"
 const DietaryDNAKeys = "BGHIP"
+const InstinctKeys = "MNSL"
 const LatitudeKeys = "THJAO"
 const RoadrunnerDNAKeys = "AMNS"
 
@@ -20,7 +21,7 @@ type Latitude struct {
 func Shuffle(keys []string) {
 	length := len(keys)
 	for i, _ := range keys {
-		j := i + rand.Intn(length - i)
+		j := i + rand.Intn(length-i)
 		keys[i], keys[j] = keys[j], keys[i]
 	}
 
