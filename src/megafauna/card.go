@@ -46,7 +46,7 @@ type Event struct {
 	IsCatastrophe           bool
 	CatastropheLevel        int
 	CatastropheIsWarming    bool
-	Description				string
+	Description             string
 }
 
 // MakeEvent creates an event from the appropriate fields in the card data.  Returns nil if the data is invalid for

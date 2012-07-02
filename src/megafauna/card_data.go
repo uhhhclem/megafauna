@@ -9,7 +9,7 @@ import (
 
 // Indices into the CSV data for the mutation cards
 const (
-	mutationCardKeyField     = iota
+	mutationCardKeyField = iota
 	mutationCardMinSizeField
 	mutationCardMaxSizeField
 	mutationCardMutationField
@@ -23,7 +23,6 @@ const (
 	mutationCardCatastropheIsWarmingField
 	mutationCardMilankovichLatitudesField
 )
-
 
 // mutationCardParseError is the error returned if one of the key fields in the biome data is invalid.
 type mutationCardParseError struct {
@@ -71,11 +70,11 @@ func (cards MutationCardMap) Parse(r io.Reader) error {
 			m.InstinctKey = instinct
 		}
 		m.Mutation = MakeDNASpec(record[mutationCardMutationField])
-		
+
 		m.Supertitle = record[mutationCardSupertitleField]
 		m.Title = record[mutationCardTitleField]
 		m.Subtitle = record[mutationCardSubtitleField]
-		
+
 		var catLevel int
 		if record[mutationCardCatastropheLevelField] != "" {
 			catLevel, err = strconv.Atoi(record[mutationCardCatastropheLevelField])
@@ -86,9 +85,9 @@ func (cards MutationCardMap) Parse(r io.Reader) error {
 		catWarming := (record[mutationCardCatastropheIsWarmingField] == "T")
 		m.Event = MakeEvent(record[mutationCardEventTypeField], record[mutationCardMilankovichLatitudesField], catLevel, catWarming)
 		if m.Event == nil {
-			return &mutationCardParseError {}
+			return &mutationCardParseError{}
 		}
-		m.Event.Description = record[mutationCardEventDescriptionField]	
+		m.Event.Description = record[mutationCardEventDescriptionField]
 		cards[m.Key] = m
 	}
 	return nil
