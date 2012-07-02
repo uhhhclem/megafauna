@@ -15,6 +15,9 @@ func TestParse(t *testing.T) {
 	}
 	
 	var cardPantingFound, cardLungsFound bool
+	
+	// loop through the cards, instead of looking them up, so that we don't have any dependency on the keys,
+	// which are pretty arbitrarily assigned and could easily change.
 	for _, card := range cards {
 		if card.Title == "Panting" {
 			cardPantingFound = true

@@ -2,10 +2,19 @@ package megafauna
 
 import "math/rand"
 
+// Biome types - Land, Water, or Orogeny
 const BiomeTypeKeys = "LWO"
+
+// Dietary DNA types - Browser, Grazer, Husker, Insectivore, or Physiology
 const DietaryDNAKeys = "BGHIP"
+
+// Instinct keys - Manual dexterity, Natural history, Social skills, or Language
 const InstinctKeys = "MNSL"
+
+// Latitude keys - Tropics, Horse latitudes, Jet stream, Arctic, or Orogeny
 const LatitudeKeys = "THJAO"
+
+// Roadrunner DNA keys - Aggression, Marine, Nocturnal, or Speedy
 const RoadrunnerDNAKeys = "AMNS"
 
 // Latitude is one of the four latitude bands on the board (Tropic, Horse Latitudes, etc.)

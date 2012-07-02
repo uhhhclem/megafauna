@@ -8,6 +8,7 @@ type Card struct {
 	Event *Event
 }
 
+// MutationCard represents a mutation card
 type MutationCard struct {
 	Card
 	MinSize     int
@@ -20,11 +21,13 @@ type MutationCard struct {
 	Reminder    string // a few mutation cards have reminders, e.g. Caudal Fin
 }
 
+// GenotypeCard represents a genotype card.
 type GenotypeCard struct {
 	MammalData   *GenotypeCardData
 	DinosaurData *GenotypeCardData
 }
 
+// GenotypeCardData represents the data in one half of a genotype card.
 type GenotypeCardData struct {
 	SilhouetteIndex int
 	MinSize         int

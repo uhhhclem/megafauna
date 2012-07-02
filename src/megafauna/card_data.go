@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Indices into the CSV data for the mutation cards
 const (
 	mutationCardKeyField     = iota
 	mutationCardMinSizeField
@@ -22,6 +23,7 @@ const (
 	mutationCardCatastropheIsWarmingField
 	mutationCardMilankovichLatitudesField
 )
+
 
 // mutationCardParseError is the error returned if one of the key fields in the biome data is invalid.
 type mutationCardParseError struct {
@@ -39,8 +41,10 @@ func (e *mutationCardParseError) Error() string {
 	return "Invalid event data."
 }
 
+// MutationCardMap is a map of string keys to MutationCard objects.
 type MutationCardMap map[string]*MutationCard
 
+// Parse parses CSV data from the Reader passed in into the receiver MutationCardMap.
 func (cards MutationCardMap) Parse(r io.Reader) error {
 	csvReader := csv.NewReader(r)
 	csvReader.TrailingComma = true
@@ -90,6 +94,7 @@ func (cards MutationCardMap) Parse(r io.Reader) error {
 	return nil
 }
 
+// CSV data for the mutation cards.
 const MutationCardData = `1,1,6,S,,Breathing while running,Carrier's Constant Diaphragm,,T,,,,
 2,1,4,SS,,Unidirectional respiration,Flow-Through Lungs,Shown is the bird system.,C,Asteroid impact global cooling,5,FALSE,
 3,1,4,PP,,Homoiotherm,Feathers,"A better insulator than fur, but prone to parasites and matting.",T,,,,
