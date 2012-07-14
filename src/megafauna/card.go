@@ -1,7 +1,5 @@
 package megafauna
 
-import "strings"
-
 // Card represents a card, either a Mutation card or a Genotype card.
 type Card struct {
 	Key   string
@@ -47,36 +45,4 @@ type Event struct {
 	CatastropheLevel        int
 	CatastropheIsWarming    bool
 	Description             string
-}
-
-// MakeEvent creates an event from the appropriate fields in the card data.  Returns nil if the data is invalid for
-// some reason (e.g. eventType unrecognized, milankovichLatitude contains a bad character).
-func MakeEvent(eventType string, milankovichLatitude string, catastropheLevel int, catastropheIsWarming bool) *Event {
-
-	var e Event
-
-	if eventType == "T" {
-		e.IsDrawTwo = true
-		return &e
-	}
-
-	if eventType == "C" {
-		e.IsCatastrophe = true
-		e.CatastropheLevel = catastropheLevel
-		e.CatastropheIsWarming = catastropheIsWarming
-		return &e
-	}
-
-	if eventType[0] == 'M' {
-		e.IsMilankovich = true
-		e.MilankovichLatitudeKeys = make([]string, len(milankovichLatitude))
-		for index, key := range milankovichLatitude {
-			if !strings.Contains(LatitudeKeys, string(key)) {
-				return nil
-			}
-			e.MilankovichLatitudeKeys[index] = string(key)
-		}
-		return &e
-	}
-	return nil
 }

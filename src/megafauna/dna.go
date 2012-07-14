@@ -24,8 +24,14 @@ type DNASpec struct {
 	Breakdown map[string]*DNA // Spec broken down for ease of comparison
 }
 
-// MakeDNASpec makes a DNASpec given an input spec, e.g. "BGGGA"
+// MakeDNASpec makes a DNASpec given an input spec, e.g. "BGGGA"  Returns nil if any
+// of the letters in spec are not valid DNA.
 func MakeDNASpec(spec string) *DNASpec {
+	for _, char := range spec {
+		if !strings.Contains(ValidDNAKeys, string(char)) {
+			return nil
+		}
+	}
 	d := new(DNASpec)
 	d.Spec = spec
 	d.Breakdown = make(map[string]*DNA)

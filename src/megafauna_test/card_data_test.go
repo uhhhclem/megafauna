@@ -65,3 +65,22 @@ func TestParse(t *testing.T) {
 		t.Error("Didn't find Flow-Through Lungs card.")
 	}
 }
+
+func TestParseErrors(t *testing.T) {
+	const invalidDNA = "8,1,4,NQ,N,,Infrared Pit Sensor,The ability to sense thermal radiation helps to detect warm-blooded predators or prey.,T,,,,\n"
+	r := strings.NewReader(invalidDNA)
+	cards := make(megafauna.MutationCardMap)
+	err := cards.Parse(r)
+	if err != megafauna.ErrInvalidDNASpec {
+		t.Error("Expected ErrInvalidDNASpec and didn't get it.")
+	}
+
+	const invalidEventData = "8,1,4,N,N,,Infrared Pit Sensor,The ability to sense thermal radiation helps to detect warm-blooded predators or prey.,Q,,,,\n"
+	r = strings.NewReader(invalidEventData)
+	cards = make(megafauna.MutationCardMap)
+	err = cards.Parse(r)
+	if err != megafauna.ErrInvalidEventType {
+		t.Error("Expected ErrInvalidEventType and didn't get it.")
+	}
+
+}

@@ -2,6 +2,7 @@ package megafauna
 
 import (
 	"encoding/csv"
+	"errors"
 	"io"
 	"strconv"
 	"strings"
@@ -24,21 +25,15 @@ const (
 	mutationCardMilankovichLatitudesField
 )
 
-// mutationCardParseError is the error returned if one of the key fields in the biome data is invalid.
-type mutationCardParseError struct {
-	invalidDNASpec     string
-	invalidInstinctKey string
-}
-
-func (e *mutationCardParseError) Error() string {
-	if e.invalidDNASpec != "" {
-		return "Invalid DNA spec: " + e.invalidDNASpec
-	}
-	if e.invalidInstinctKey != "" {
-		return "Invalid instinct key: " + e.invalidInstinctKey
-	}
-	return "Invalid event data."
-}
+var (
+	ErrInvalidEventType        = errors.New("Invalid event type.")
+	ErrInvalidLatitudeKey      = errors.New("Invalid latitude key.")
+	ErrInvalidDNASpec          = errors.New("Invalid DNA spec.")
+	ErrInvalidInstinctKey      = errors.New("Invalid instinct key.")
+	ErrInvalidCatastropheLevel = errors.New("Invalid catastrophe level.")
+	ErrInvalidMinSize          = errors.New("Invalid minimum size.")
+	ErrInvalidMaxSize          = errors.New("Invalid maximum size.")
+)
 
 // MutationCardMap is a map of string keys to MutationCard objects.
 type MutationCardMap map[string]*MutationCard
@@ -56,20 +51,23 @@ func (cards MutationCardMap) Parse(r io.Reader) error {
 		m.Key = record[mutationCardKeyField]
 		m.MinSize, err = strconv.Atoi(record[mutationCardMinSizeField])
 		if err != nil {
-			return err
+			return ErrInvalidMinSize
 		}
 		m.MaxSize, err = strconv.Atoi(record[mutationCardMaxSizeField])
 		if err != nil {
-			return err
+			return ErrInvalidMaxSize
 		}
 		instinct := record[mutationCardInstinctField]
 		if instinct != "" {
 			if len(instinct) != 1 || !strings.Contains(InstinctKeys, instinct) {
-				return &mutationCardParseError{"", instinct}
+				return ErrInvalidInstinctKey
 			}
 			m.InstinctKey = instinct
 		}
 		m.Mutation = MakeDNASpec(record[mutationCardMutationField])
+		if m.Mutation == nil {
+			return ErrInvalidDNASpec
+		}
 
 		m.Supertitle = record[mutationCardSupertitleField]
 		m.Title = record[mutationCardTitleField]
@@ -79,18 +77,47 @@ func (cards MutationCardMap) Parse(r io.Reader) error {
 		if record[mutationCardCatastropheLevelField] != "" {
 			catLevel, err = strconv.Atoi(record[mutationCardCatastropheLevelField])
 			if err != nil {
-				return err
+				return ErrInvalidCatastropheLevel
 			}
 		}
 		catWarming := (record[mutationCardCatastropheIsWarmingField] == "T")
-		m.Event = MakeEvent(record[mutationCardEventTypeField], record[mutationCardMilankovichLatitudesField], catLevel, catWarming)
-		if m.Event == nil {
-			return &mutationCardParseError{}
+		m.Event, err = MakeEvent(record[mutationCardEventTypeField], record[mutationCardMilankovichLatitudesField], catLevel, catWarming)
+		if err != nil {
+			return err
 		}
 		m.Event.Description = record[mutationCardEventDescriptionField]
 		cards[m.Key] = m
 	}
 	return nil
+}
+
+// MakeEvent creates an event from the appropriate fields in the card data.  Returns error if the data is invalid
+func MakeEvent(eventType string, milankovichLatitude string, catastropheLevel int, catastropheIsWarming bool) (*Event, error) {
+
+	var e Event
+	eventKey := eventType[0]
+
+	switch {
+	case eventKey == 'T':
+		e.IsDrawTwo = true
+		return &e, nil
+	case eventKey == 'C':
+		e.IsCatastrophe = true
+		e.CatastropheLevel = catastropheLevel
+		e.CatastropheIsWarming = catastropheIsWarming
+		return &e, nil
+	case eventKey == 'M':
+		e.IsMilankovich = true
+		e.MilankovichLatitudeKeys = make([]string, len(milankovichLatitude))
+		for index, key := range milankovichLatitude {
+			if !strings.Contains(LatitudeKeys, string(key)) {
+				return nil, ErrInvalidLatitudeKey
+			}
+			e.MilankovichLatitudeKeys[index] = string(key)
+		}
+		return &e, nil
+	}
+	return nil, ErrInvalidEventType
 }
 
 // CSV data for the mutation cards.

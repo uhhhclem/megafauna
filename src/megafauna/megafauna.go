@@ -17,6 +17,9 @@ const LatitudeKeys = "THJAO"
 // Roadrunner DNA keys - Aggression, Marine, Nocturnal, or Speedy
 const RoadrunnerDNAKeys = "AMNS"
 
+// ValidDNAKeys contains all valid DNA keys
+const ValidDNAKeys = DietaryDNAKeys + RoadrunnerDNAKeys
+
 // Latitude is one of the four latitude bands on the board (Tropic, Horse Latitudes, etc.)
 type Latitude struct {
 	Key     string
