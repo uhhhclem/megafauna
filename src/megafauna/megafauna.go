@@ -1,6 +1,7 @@
 package megafauna
 
 import "math/rand"
+import "time"
 
 // Biome types - Land, Water, or Orogeny
 const BiomeTypeKeys = "LWO"
@@ -27,9 +28,18 @@ type Latitude struct {
 	Habitat []*Habitat
 }
 
+// SeedRand seeds the RNG for calls to Shuffle.  If this is 0, Shuffle will use the system time as the seed.
+func SeedRand(value int64) {
+	if value == 0 {
+		value = time.Now().Unix()
+	}
+	rand.Seed(value)
+}
+
 // Shuffle implements the Fisher-Yates-Knuth shuffling algorithm.  It takes a slice of
-// strings (typically keys to maps of tiles or cards) and randomizes their order.  Note
-// that the caller is responsible for seeding the random number generator.
+// strings (typically keys to maps of tiles or cards) and randomizes their order.  This
+// automatically seeds the RNG unless SetSeed is called first.  Note that this resets the
+// seed to 0; if you want Shuffle to behave deterministically, call SetSeed before every call.
 func Shuffle(keys []string) {
 	length := len(keys)
 	for i, _ := range keys {
