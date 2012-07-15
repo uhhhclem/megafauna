@@ -1,6 +1,7 @@
 package megafauna
 
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -11,6 +12,7 @@ const (
 	MapDirectionW
 )
 
+// latitudeKeys is local, because megafauna.LatitudeKeys includes the O for orogeny. 
 const latitudeKeys = "AJHT"
 
 // Board contains the Habitats on the board.
@@ -56,31 +58,32 @@ func NewBoard() *Board {
 
 func populateHabitats(board *Board) {
 	climaxNumbers := make([]string, 4)
-	climaxNumbers[0] = "236541"
+	climaxNumbers[0] = "263541"
 	climaxNumbers[1] = "614532"
 	climaxNumbers[2] = "243561"
 	climaxNumbers[3] = "73856412"
 
-	for i, key := range latitudeKeys {
-		board.Habitats[i] = makeHabitatsInLatitude(string(key), climaxNumbers[i])
+	for row, ch := range latitudeKeys {
+		latitudeKey := string(ch)
+		board.Habitats[row] = makeHabitatsInLatitude(latitudeKey, climaxNumbers[row])
 	}
 	return
 }
 
 // makeHabitatsInLatitude creates a slice of Habitats from a string of climax numbers.
-func makeHabitatsInLatitude(key string, climaxNumbers string) []*Habitat {
+func makeHabitatsInLatitude(latitudeKey string, climaxNumbers string) []*Habitat {
 	lat := make([]*Habitat, len(climaxNumbers))
-	for i, ch := range climaxNumbers {
+	for col, ch := range climaxNumbers {
 		h := new(Habitat)
 		h.AdjacentHabitats = make([]*Habitat, 4)
-		h.Key = key + string(i)
 		h.ClimaxNumber, _ = strconv.Atoi(string(ch))
-		lat[i] = h
+		h.Key = fmt.Sprintf("%v%v", latitudeKey, col)
+		lat[col] = h
 	}
 	return lat
 }
 
-// setOrogenyHabitats marks the Habitats on the board that are orogeny.
+// setOrogenyHabitats marks the Habitats on the board that are orogeny.  It also creates the LatitudeMap for orogeny habitats.
 func setOrogenyHabitats(board *Board) {
 	hab := board.Habitats
 	hab[0][4].IsOrogeny = true
@@ -89,6 +92,25 @@ func setOrogenyHabitats(board *Board) {
 	hab[2][0].IsOrogeny = true
 	hab[2][4].IsOrogeny = true
 	hab[3][1].IsOrogeny = true
+
+	lat := new(Latitude)
+	lat.Key = "O"
+	lat.Name = "Orogeny"
+	lat.Habitats = make([]*Habitat, 6)
+
+	index := 0
+	for row, _ := range board.Habitats {
+		for col, _ := range board.Habitats[row] {
+			h := board.Habitats[row][col]
+			if h.IsOrogeny {
+				lat.Habitats[index] = h
+				index++
+			}
+		}
+	}
+
+	board.LatitudeMap["O"] = lat
+
 	return
 }
 
@@ -99,8 +121,8 @@ func setAdjacentHabitats(board *Board) {
 
 	// for the top 4 rows of habitats, the method is simple, since the slices of habitats
 	// comprise a rectangular array of cells.
-	for row := 0; row < 4; row++ {
-		for col := 0; col < 5; col++ {
+	for row := 0; row < len(hab); row++ {
+		for col := 0; col < 6; col++ {
 			h = hab[row][col]
 			if row > 0 {
 				h.AdjacentHabitats[MapDirectionN] = hab[row-1][col]
@@ -109,10 +131,10 @@ func setAdjacentHabitats(board *Board) {
 				h.AdjacentHabitats[MapDirectionS] = hab[row+1][col]
 			}
 			if col > 0 {
-				h.AdjacentHabitats[MapDirectionE] = hab[row][col-1]
+				h.AdjacentHabitats[MapDirectionW] = hab[row][col-1]
 			}
 			if col < 5 {
-				h.AdjacentHabitats[MapDirectionW] = hab[row][col+1]
+				h.AdjacentHabitats[MapDirectionE] = hab[row][col+1]
 			}
 		}
 	}
@@ -133,17 +155,21 @@ func setAdjacentHabitats(board *Board) {
 // setLatitudeMap initializes the LatitudeMap part of the board.
 func setLatitudeMap(board *Board) {
 	m := board.LatitudeMap
-
+	var cols int
 	for row, letter := range latitudeKeys {
 		key := string(letter)
-		m[key] = new(Latitude)
-		m[key].Key = key
-
-		lat := m[string(key)]
-		cols := len(lat.Habitats)
+		lat := new(Latitude)
+		lat.Key = key
+		if key == "T" {
+			cols = 8
+		} else {
+			cols = 6
+		}
+		lat.Habitats = make([]*Habitat, cols)
 		for col := 0; col < cols; col++ {
 			lat.Habitats[col] = board.Habitats[row][col]
 		}
+		m[key] = lat
 	}
 
 	m["A"].Name = "Arctic"
@@ -154,12 +180,34 @@ func setLatitudeMap(board *Board) {
 	return
 }
 
-// setHabitatMap puts all of the Habitats on the board into a map keyed on Habitat.Key, e.g. the leftmost Habitat
-// in the horse latitudes is H0 and the rightmost arctic habitat is A5.
+// setHabitatMap puts all of the Habitats on the board into a map keyed on Habitat.Key.
 func setHabitatMap(board *Board) {
-	for key, lat := range board.LatitudeMap {
-		for i, h := range lat.Habitats {
-			h.Key = key + string(i)
+	board.HabitatMap = make(map[string]*Habitat)
+	for row, _ := range board.Habitats {
+		for col, _ := range board.Habitats[row] {
+			h := board.Habitats[row][col]
+			board.HabitatMap[h.Key] = h
 		}
 	}
+}
+
+// FindLowestClimax returns the habitat with the lowest climax number in the requested latitude.
+func (b *Board) FindLowestClimax(latitudeKey string) (*Habitat, error) {
+	var result *Habitat
+	min := 1000 // all climax numbers are less than 1000
+	lat := b.LatitudeMap[latitudeKey]
+	if lat == nil {
+		return nil, ErrInvalidLatitudeKey
+	}
+	for _, h := range b.LatitudeMap[latitudeKey].Habitats {
+		climaxNumber := h.ClimaxNumber
+		if h.Biome != nil {
+			climaxNumber = h.Biome.BiomeTile.ClimaxNumber
+		}
+		if climaxNumber < min {
+			min = climaxNumber
+			result = h
+		}
+	}
+	return result, nil
 }
