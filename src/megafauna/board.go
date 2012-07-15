@@ -15,14 +15,17 @@ const (
 // latitudeKeys is local, because megafauna.LatitudeKeys includes the O for orogeny. 
 const latitudeKeys = "AJHT"
 
-// Board contains the Habitats on the board.
+// Board contains the Habitats on the board as well as various data structures to support lookup and searching.
+// LatitudeMap is used to find all the habitats with a given latitude key, and HabitatMap is used to find a
+// habitat given its key.
 type Board struct {
 	Habitats    [][]*Habitat         // the four outer slices are the latitude bands
 	LatitudeMap map[string]*Latitude // map of latitude keys to the habitats in that latitude
 	HabitatMap  map[string]*Habitat  // for looking up habitats by their key
 }
 
-// Latitude is one of the four latitude rows on the board (Tropic, Horse Latitudes, etc.)
+// Latitude is one of the four latitude rows on the board (Tropic, Horse Latitudes, etc.).  Note that there will
+// also be an orogeny "latitude" with a Key of O - this facilitates using FindLowestClimax to place orogeny biomes.
 type Latitude struct {
 	Key      string
 	Name     string
@@ -32,12 +35,11 @@ type Latitude struct {
 // Habitat is a space on the board that contains a slot for the biome, the predator triangle,
 // and the rooter triangle.
 type Habitat struct {
-	Key              string
-	Latitude         *Latitude
-	ClimaxNumber     int
-	IsOrogeny        bool
-	AdjacentHabitats []*Habitat
-	Biome            *Biome
+	Key              string     // The latitude key plus a zero-based index, e.g. "T0" is the first habitat in the Tropics
+	ClimaxNumber     int        // The printed climax number for the habitat
+	IsOrogeny        bool       // True for orogeny habitats 
+	AdjacentHabitats []*Habitat // Indexed by map direction; an entry is nil if there's no habitat in that direction
+	Biome            *Biome     // The Biome, if any in this habitat
 }
 
 // NewBoard initializes the board.
@@ -56,6 +58,7 @@ func NewBoard() *Board {
 	return board
 }
 
+// populateHabitats creates all the Habitat objects and stores them in the board's Habitats field.
 func populateHabitats(board *Board) {
 	climaxNumbers := make([]string, 4)
 	climaxNumbers[0] = "263541"
@@ -155,15 +158,13 @@ func setAdjacentHabitats(board *Board) {
 // setLatitudeMap initializes the LatitudeMap part of the board.
 func setLatitudeMap(board *Board) {
 	m := board.LatitudeMap
-	var cols int
 	for row, letter := range latitudeKeys {
 		key := string(letter)
 		lat := new(Latitude)
 		lat.Key = key
+		cols := 6
 		if key == "T" {
 			cols = 8
-		} else {
-			cols = 6
 		}
 		lat.Habitats = make([]*Habitat, cols)
 		for col := 0; col < cols; col++ {
