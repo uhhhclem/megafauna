@@ -21,13 +21,6 @@ const RoadrunnerDNAKeys = "AMNS"
 // ValidDNAKeys contains all valid DNA keys
 const ValidDNAKeys = DietaryDNAKeys + RoadrunnerDNAKeys
 
-// Latitude is one of the four latitude bands on the board (Tropic, Horse Latitudes, etc.)
-type Latitude struct {
-	Key     string
-	Name    string
-	Habitat []*Habitat
-}
-
 // SeedRand seeds the RNG for calls to Shuffle.  If this is 0, Shuffle will use the system time as the seed.
 func SeedRand(value int64) {
 	if value == 0 {
