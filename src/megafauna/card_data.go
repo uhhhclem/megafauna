@@ -38,6 +38,8 @@ var (
 // MutationCardMap is a map of string keys to MutationCard objects.
 type MutationCardMap map[string]*MutationCard
 
+type GenotypeCardMap map[string]*GenotypeCard
+
 // Parse parses CSV data from the Reader passed in into the receiver MutationCardMap.
 func (cards MutationCardMap) Parse(r io.Reader) error {
 	csvReader := csv.NewReader(r)

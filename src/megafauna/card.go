@@ -3,7 +3,7 @@ package megafauna
 // Card represents a card, either a Mutation card or a Genotype card.
 type Card struct {
 	Key   string
-	Event *Event
+	Event *Event // the Event for this card
 }
 
 // MutationCard represents a mutation card
@@ -21,6 +21,7 @@ type MutationCard struct {
 
 // GenotypeCard represents a genotype card.
 type GenotypeCard struct {
+	Card
 	MammalData   *GenotypeCardData
 	DinosaurData *GenotypeCardData
 }

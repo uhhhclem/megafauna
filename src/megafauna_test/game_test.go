@@ -23,7 +23,7 @@ func TestSortPlayers(t *testing.T) {
 	}
 }
 
-func TestNewGame(t *testing.T) {
+func TestNewGame_Players(t *testing.T) {
 	var g *megafauna.Game
 
 	g = megafauna.NewGame([]string{""})
@@ -80,6 +80,39 @@ func TestNewGame(t *testing.T) {
 			return
 		}
 		prevDentition = p.Dentition
+	}
+}
+
+func TestNewGame_Cards(t *testing.T) {
+	g := megafauna.NewGame([]string{"John", "Paul", "George", "Ringo"})
+	if len(g.MutationCards)+len(g.GenotypeCards) != len(g.CardKeys) {
+		t.Error("CardKeys isn't the right length.")
+		return
+	}
+}
+
+func TestGetCard(t *testing.T) {
+	g := megafauna.NewGame([]string{"Dick", "Jane"})
+
+	for _, k := range g.CardKeys {
+		mut, gen := g.GetCard(k)
+		if mut == nil && gen == nil {
+			t.Error("We should always get either a mutation or a genotype card.")
+			return
+		}
+		if mut != nil && gen != nil {
+			t.Error("Only one of the objects returned should have a value.")
+			return
+		}
+		if mut != nil {
+			delete(g.MutationCards, k)
+		}
+		if gen != nil {
+			delete(g.GenotypeCards, k)
+		}
+	}
+	if len(g.MutationCards) != 0 || len(g.GenotypeCards) != 0 {
+		t.Error("We should have deleted all the cards from both maps.")
 	}
 }
 
