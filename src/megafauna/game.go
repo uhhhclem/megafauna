@@ -2,6 +2,7 @@ package megafauna
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 )
 
@@ -28,11 +29,20 @@ func (p SortablePlayerCollection) Swap(i, j int) {
 }
 
 // NewGame creates a new Game and initializes the Players
-func NewGame(players SortablePlayerCollection) *Game {
-	if len(players) < 2 || len(players) > 4 {
+func NewGame(names []string) *Game {
+	if len(names) < 2 || len(names) > 4 {
 		return nil
 	}
 	g := new(Game)
+	
+	// create and name the players
+	players := make(SortablePlayerCollection, len(names))
+	for index, name := range names {
+		p := new(Player)
+		p.Name = name
+		players[index] = p
+	}
+	
 	// Randomly assign dentitions to each player.  Shuffle takes strings, so we'll have to convert
 	// the dentitions to ints.  
 	dentitions := []string{"2", "3", "4", "5"}
@@ -57,6 +67,8 @@ func NewGame(players SortablePlayerCollection) *Game {
 		}
 	}
 
+	g.Players = players
+	sort.Sort(g.Players)
 	return g
 }
 
