@@ -6,11 +6,12 @@ import (
 	"strconv"
 )
 
+// Game is one discrete game of Bios Megafauna.
 type Game struct {
 	Players SortablePlayerCollection // slice of Player objects, in player order
 }
 
-// SortablePlayerCollection is used to sort players by Dentition
+// SortablePlayerCollection is used to sort Players by Dentition.
 type SortablePlayerCollection []*Player
 
 // Len returns the length of a SortablePlayerCollection.
@@ -28,7 +29,7 @@ func (p SortablePlayerCollection) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
 
-// NewGame creates a new Game and initializes the Players
+// NewGame creates a new Game and initializes the Players.
 func NewGame(names []string) *Game {
 	if len(names) < 2 || len(names) > 4 {
 		return nil
@@ -48,27 +49,25 @@ func NewGame(names []string) *Game {
 	dentitions := []string{"2", "3", "4", "5"}
 	colors := []string{"Red", "Orange", "Green", "White"}
 	Shuffle(dentitions)
-	minDentition := 99
 	for index, p := range players {
 		p.Dentition, _ = strconv.Atoi(dentitions[index])
-		if p.Dentition < minDentition {
-			minDentition = p.Dentition
-		}
 		p.Color = colors[p.Dentition-2]
 		p.IsDinosaur = p.Dentition == 2 || p.Dentition == 4
 		p.Species = make([]*Species, 4)
 	}
 
-	// Everyone gets 4 genes except the starting player
-	for _, p := range players {
+	// sort the players by Dentition
+	sort.Sort(players)
+
+	// everyone gets 4 genes except the starting player
+	for i, p := range players {
 		p.Genes = 4
-		if p.Dentition == minDentition {
+		if i == 0 {
 			p.Genes -= 1
 		}
 	}
 
 	g.Players = players
-	sort.Sort(g.Players)
 	return g
 }
 
