@@ -34,7 +34,7 @@ func NewGame(names []string) *Game {
 		return nil
 	}
 	g := new(Game)
-	
+
 	// create and name the players
 	players := make(SortablePlayerCollection, len(names))
 	for index, name := range names {
@@ -42,7 +42,7 @@ func NewGame(names []string) *Game {
 		p.Name = name
 		players[index] = p
 	}
-	
+
 	// Randomly assign dentitions to each player.  Shuffle takes strings, so we'll have to convert
 	// the dentitions to ints.  
 	dentitions := []string{"2", "3", "4", "5"}
