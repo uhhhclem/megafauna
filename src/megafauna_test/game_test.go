@@ -82,3 +82,14 @@ func TestNewGame(t *testing.T) {
 		prevDentition = p.Dentition
 	}
 }
+
+func TestGetPlayer(t *testing.T) {
+	g := megafauna.NewGame([]string{"John", "Paul", "George", "Ringo"})
+	for _, d := range []int{2, 3, 4, 5} {
+		p := g.GetPlayer(d)
+		if p == nil || p.Dentition != d {
+			t.Errorf("Didn't get the player with dentition %v.", d)
+			return
+		}
+	}
+}
