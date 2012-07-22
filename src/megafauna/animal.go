@@ -25,6 +25,7 @@ type Immigrant struct {
 // Species represents one of the player's four species
 type Species struct {
 	Animal
+	Silhouette int // the silhouette (0-3) chosen for this species
 }
 
 // HerbivoreContest is used to determine the winner of herbivore contests during the cull.  Set Animals, Requirements, 

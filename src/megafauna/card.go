@@ -31,7 +31,7 @@ type GenotypeCardData struct {
 	SilhouetteIndex int
 	MinSize         int
 	MaxSize         int
-	DNAGenome       *DNASpec
+	DNASpec         *DNASpec
 	Family          string
 	Title           string
 	Subtitle        string

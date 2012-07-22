@@ -67,6 +67,7 @@ func (g *Game) createPlayers(names []string) {
 		p.Color = colors[p.Dentition-2]
 		p.IsDinosaur = p.Dentition == 2 || p.Dentition == 4
 		p.Species = make([]*Species, 4)
+		p.AnimalTokens = []int{8, 8, 8, 8}
 	}
 
 	// sort the players by Dentition
@@ -90,7 +91,7 @@ func (g *Game) createCards() {
 
 	// get the mutation cards
 	g.MutationCards = make(MutationCardMap)
-	r := strings.NewReader(MutationCardData)
+	r := strings.NewReader(MutationCardSourceData)
 	g.MutationCards.Parse(r)
 
 	// get the genotype cards (this it TODO)
@@ -125,12 +126,13 @@ func (g *Game) GetPlayer(dentition int) *Player {
 
 // Player defines a player and his resources.
 type Player struct {
-	Name       string     // the player's name
-	Color      string     // the player's color
-	Dentition  int        // how many teeth the player has
-	IsDinosaur bool       // indicates if the player species are dinosaurs or mammals
-	Species    []*Species // the players' species
-	Genes      int        // how many genes the player currently has
+	Name         string     // the player's name
+	Color        string     // the player's color
+	Dentition    int        // how many teeth the player has
+	IsDinosaur   bool       // indicates if the player species are dinosaurs or mammals
+	Species      []*Species // the players' species
+	Genes        int        // number of genes the player currently has
+	AnimalTokens []int      // number of animal tokens (of silhouettes 0-3) are in the player's supply
 }
 
 // String formats a Player for display.

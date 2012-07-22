@@ -42,8 +42,8 @@ func TestMakeEvent(t *testing.T) {
 
 }
 
-func TestParse(t *testing.T) {
-	reader := strings.NewReader(megafauna.MutationCardData)
+func TestParseMutationCards(t *testing.T) {
+	reader := strings.NewReader(megafauna.MutationCardSourceData)
 	cards := make(megafauna.MutationCardMap)
 	err := cards.Parse(reader)
 	if err != nil {
@@ -99,6 +99,40 @@ func TestParse(t *testing.T) {
 	}
 	if !cardLungsFound {
 		t.Error("Didn't find Flow-Through Lungs card.")
+	}
+}
+
+func TestParseGenomeCards(t *testing.T) {
+	reader := strings.NewReader(megafauna.GenotypeCardSourceData)
+	cards := make(megafauna.GenotypeCardMap)
+	err := cards.Parse(reader)
+	if err != nil {
+		t.Errorf("cards.Parse returned %v", err.Error())
+	}
+
+	// G3,rhino,Artodactyl ungulate,Swine,"pigs, hippos",1,4,GP,dino,Ornithischian ornithopod,Duckbills,"lambeosaurines, iguanodonts, hadrosaurs",2,5,GG,T,,,,
+
+	card := cards["G3"]
+	m := card.MammalData
+	if m.SilhouetteIndex != 1 ||
+		m.Family != "Artodactyl ungulate" ||
+		m.Title != "Swine" ||
+		m.Subtitle != "pigs, hippos" ||
+		m.MinSize != 1 ||
+		m.MaxSize != 4 ||
+		m.DNASpec.Spec != "GP" {
+		t.Error("Didn't parse mammal data correctly.")
+	}
+	d := card.DinosaurData
+	if d.SilhouetteIndex != 0 ||
+		d.Family != "Ornithischian ornithopod" ||
+		d.Title != "Duckbills" ||
+		d.Subtitle != "lambeosaurines, iguanodonts, hadrosaurs" ||
+		d.DNASpec.Spec != "GG" {
+		t.Error("Didn't parse dinosaur data correctly.")
+	}
+	if !card.Event.IsDrawTwo {
+		t.Error("Didn't parse event data correctly.")
 	}
 }
 
