@@ -83,17 +83,13 @@ func TestNewGame_Players(t *testing.T) {
 	}
 }
 
-func TestNewGame_Cards(t *testing.T) {
-	g := megafauna.NewGame([]string{"John", "Paul", "George", "Ringo"})
-	if len(g.MutationCards)+len(g.GenotypeCards) != len(g.CardKeys) {
-		t.Error("CardKeys isn't the right length.")
-		return
-	}
-}
-
 func TestGetCard(t *testing.T) {
 	g := megafauna.NewGame([]string{"Dick", "Jane"})
 
+	if len(g.CardKeys) < 10 {
+		t.Error("There should be at least 10 cards.")
+		return
+	}
 	for _, k := range g.CardKeys {
 		mut, gen := g.GetCard(k)
 		if mut == nil && gen == nil {
@@ -104,15 +100,6 @@ func TestGetCard(t *testing.T) {
 			t.Error("Only one of the objects returned should have a value.")
 			return
 		}
-		if mut != nil {
-			delete(g.MutationCards, k)
-		}
-		if gen != nil {
-			delete(g.GenotypeCards, k)
-		}
-	}
-	if len(g.MutationCards) != 0 || len(g.GenotypeCards) != 0 {
-		t.Error("We should have deleted all the cards from both maps.")
 	}
 }
 

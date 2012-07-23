@@ -9,10 +9,9 @@ import (
 
 // Game is one discrete game of Bios Megafauna.
 type Game struct {
-	Players       SortablePlayerCollection // slice of Player objects, in player order
-	MutationCards MutationCardMap          // master map of all mutation cards
-	GenotypeCards GenotypeCardMap          // master map of all genotype cards
-	CardKeys      []string                 // shuffled slice of keys to all cards
+	Players  SortablePlayerCollection // slice of Player objects, in player order
+	Cards    map[string]interface{}
+	CardKeys []string // shuffled slice of keys to all cards
 }
 
 // SortablePlayerCollection is used to sort Players by Dentition.
@@ -40,6 +39,7 @@ func NewGame(names []string) *Game {
 	if g.Players == nil {
 		return nil
 	}
+	g.createCards()
 	return g
 }
 
@@ -87,21 +87,16 @@ func (g *Game) createPlayers(names []string) {
 
 // createCards initializes the deck.
 func (g *Game) createCards() {
-	g.CardKeys = make([]string, 0)
-
 	// get the mutation cards
-	g.MutationCards = make(MutationCardMap)
+	g.Cards = make(map[string]interface{})
 	r := strings.NewReader(MutationCardSourceData)
-	g.MutationCards.Parse(r)
+	ParseMutationCards(r, g.Cards)
+	r = strings.NewReader(GenotypeCardSourceData)
+	ParseGenotypeCards(r, g.Cards)
 
-	// get the genotype cards (this it TODO)
-	g.GenotypeCards = make(GenotypeCardMap)
-
-	// add the keys from both collections to CardKeys
-	for k, _ := range g.MutationCards {
-		g.CardKeys = append(g.CardKeys, k)
-	}
-	for k, _ := range g.GenotypeCards {
+	// get their keys and shuffle them
+	g.CardKeys = make([]string, 0)
+	for k, _ := range g.Cards {
 		g.CardKeys = append(g.CardKeys, k)
 	}
 	Shuffle(g.CardKeys)
@@ -109,9 +104,14 @@ func (g *Game) createCards() {
 
 // GetCard returns the MutationCard or GenotypeCard for a given key.
 func (g *Game) GetCard(key string) (*MutationCard, *GenotypeCard) {
-	mut := g.MutationCards[key]
-	gen := g.GenotypeCards[key]
-	return mut, gen
+	switch g.Cards[key].(type) {
+	case *MutationCard:
+		return g.Cards[key].(*MutationCard), nil
+	case *GenotypeCard:
+		return nil, g.Cards[key].(*GenotypeCard)
+	}
+	panic("Something's not right in Cards.")
+	return nil, nil
 }
 
 // GetPlayer returns the Player with the given dentition.

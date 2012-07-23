@@ -44,17 +44,24 @@ func TestMakeEvent(t *testing.T) {
 
 func TestParseMutationCards(t *testing.T) {
 	reader := strings.NewReader(megafauna.MutationCardSourceData)
-	cards := make(megafauna.MutationCardMap)
-	err := cards.Parse(reader)
+	cards := make(map[string]interface{})
+	err := megafauna.ParseMutationCards(reader, cards)
 	if err != nil {
-		t.Errorf("cards.Parse returned %v", err.Error())
+		t.Errorf("ParseMutationCards returned %v", err.Error())
 	}
 
+	var card *megafauna.MutationCard
 	var cardPantingFound, cardLungsFound bool
 
 	// loop through the cards, instead of looking them up, so that we don't have any dependency on the keys,
 	// which are pretty arbitrarily assigned and could easily change.
-	for _, card := range cards {
+	for _, v := range cards {
+		switch v.(type) {
+		default:
+			continue
+		case *megafauna.MutationCard:
+			card = v.(*megafauna.MutationCard)
+		}
 		if card.Title == "Panting" {
 			cardPantingFound = true
 			if card.MinSize != 1 {
@@ -102,17 +109,17 @@ func TestParseMutationCards(t *testing.T) {
 	}
 }
 
-func TestParseGenomeCards(t *testing.T) {
+func TestParseGenotypeCards(t *testing.T) {
 	reader := strings.NewReader(megafauna.GenotypeCardSourceData)
-	cards := make(megafauna.GenotypeCardMap)
-	err := cards.Parse(reader)
+	cards := make(map[string]interface{})
+	err := megafauna.ParseGenotypeCards(reader, cards)
 	if err != nil {
-		t.Errorf("cards.Parse returned %v", err.Error())
+		t.Errorf("ParseGenotypeCards returned %v", err.Error())
 	}
 
 	// G3,rhino,Artodactyl ungulate,Swine,"pigs, hippos",1,4,GP,dino,Ornithischian ornithopod,Duckbills,"lambeosaurines, iguanodonts, hadrosaurs",2,5,GG,T,,,,
 
-	card := cards["G3"]
+	card := cards["G3"].(*megafauna.GenotypeCard)
 	m := card.MammalData
 	if m.SilhouetteIndex != 1 ||
 		m.Family != "Artodactyl ungulate" ||
@@ -138,17 +145,18 @@ func TestParseGenomeCards(t *testing.T) {
 
 func TestParseErrors(t *testing.T) {
 	const invalidDNA = "8,1,4,NQ,N,,Infrared Pit Sensor,The ability to sense thermal radiation helps to detect warm-blooded predators or prey.,T,,,,\n"
+	var err error
+
 	r := strings.NewReader(invalidDNA)
-	cards := make(megafauna.MutationCardMap)
-	err := cards.Parse(r)
+	cards := make(map[string]interface{})
+	err = megafauna.ParseMutationCards(r, cards)
 	if err != megafauna.ErrInvalidDNASpec {
 		t.Error("Expected ErrInvalidDNASpec and didn't get it.")
 	}
 
 	const invalidEventData = "8,1,4,N,N,,Infrared Pit Sensor,The ability to sense thermal radiation helps to detect warm-blooded predators or prey.,Q,,,,\n"
 	r = strings.NewReader(invalidEventData)
-	cards = make(megafauna.MutationCardMap)
-	err = cards.Parse(r)
+	err = megafauna.ParseMutationCards(r, cards)
 	if err != megafauna.ErrInvalidEventType {
 		t.Error("Expected ErrInvalidEventType and didn't get it.")
 	}

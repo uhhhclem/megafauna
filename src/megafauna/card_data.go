@@ -40,11 +40,9 @@ var (
 	ErrInvalidSilhouetteAbbrev = errors.New("Invalid silhouette abbreviation.")
 )
 
-// MutationCardMap is a map of string keys to MutationCard objects.
-type MutationCardMap map[string]*MutationCard
-
-// Parse parses CSV data from the Reader passed in into the receiver MutationCardMap.
-func (cards MutationCardMap) Parse(r io.Reader) error {
+// ParseMutationCards parses CSV data from the Reader and puts the resulting MutationCard objects in the
+// cards map.
+func ParseMutationCards(r io.Reader, cards map[string]interface{}) error {
 	csvReader := csv.NewReader(r)
 	csvReader.TrailingComma = true
 	records, err := csvReader.ReadAll()
@@ -53,7 +51,7 @@ func (cards MutationCardMap) Parse(r io.Reader) error {
 	}
 	for _, record := range records {
 		m := new(MutationCard)
-		m.Key = record[mutationCardKeyField]
+		key := record[mutationCardKeyField]
 		m.MinSize, err = strconv.Atoi(record[mutationCardMinSizeField])
 		if err != nil {
 			return ErrInvalidMinSize
@@ -91,7 +89,7 @@ func (cards MutationCardMap) Parse(r io.Reader) error {
 			return err
 		}
 		m.Event.Description = record[mutationCardEventDescriptionField]
-		cards[m.Key] = m
+		cards[key] = m
 	}
 	return nil
 }
@@ -120,10 +118,8 @@ const (
 	genotypeCardMilankovichLatitudesField
 )
 
-type GenotypeCardMap map[string]*GenotypeCard
-
 // Parse parses CSV data from the Reader passed in into the receiver GenotypeCardMap.
-func (cards GenotypeCardMap) Parse(r io.Reader) error {
+func ParseGenotypeCards(r io.Reader, cards map[string]interface{}) error {
 	csvReader := csv.NewReader(r)
 	csvReader.TrailingComma = true
 	records, err := csvReader.ReadAll()
@@ -134,7 +130,7 @@ func (cards GenotypeCardMap) Parse(r io.Reader) error {
 		var err error
 		var data *GenotypeCardData
 		g := new(GenotypeCard)
-		g.Key = record[genotypeCardKeyField]
+		key := record[genotypeCardKeyField]
 		data, err = parseGenotypeData(record, genotypeCardMSilhouetteField)
 		if err != nil {
 			return err
@@ -159,7 +155,7 @@ func (cards GenotypeCardMap) Parse(r io.Reader) error {
 			return err
 		}
 		g.Event.Description = record[genotypeCardEventDescriptionField]
-		cards[g.Key] = g
+		cards[key] = g
 	}
 	return nil
 }
