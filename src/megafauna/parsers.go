@@ -67,14 +67,14 @@ func (tiles TileMap) Parse(r io.Reader) error {
 		switch record[BiomeTileTypeField] {
 		case "L":
 			t.IsLand = true
-		case "W":
-			t.IsWater = true
+		case "S":
+			t.IsSea = true
 		case "O":
 			t.IsLand = true
 			b.IsOrogeny = true
 		case "B":
-			t.IsLand=true
-			t.IsWater=true			
+			t.IsLand = true
+			t.IsSea = true
 		default:
 			return errInvalidType
 		}
