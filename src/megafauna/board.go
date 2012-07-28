@@ -203,7 +203,7 @@ func (b *Board) FindLowestClimax(latitudeKey string) (*Habitat, error) {
 	for _, h := range b.LatitudeMap[latitudeKey].Habitats {
 		climaxNumber := h.ClimaxNumber
 		if h.Biome != nil {
-			climaxNumber = h.Biome.BiomeTile.ClimaxNumber
+			climaxNumber = h.Biome.GetClimaxNumber()
 		}
 		if climaxNumber < min {
 			min = climaxNumber

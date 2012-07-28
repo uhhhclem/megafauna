@@ -2,6 +2,7 @@ package megafauna
 
 import (
 	"encoding/csv"
+	"errors"
 	"io"
 	"strconv"
 	"strings"
@@ -14,10 +15,10 @@ type Parseable interface {
 	Parse(io.Reader) error
 }
 
-// TileMap is a Parseable of *BiomeTiles.
-type BiomeTileMap map[string]*BiomeTile
+// TileMap is a Parseable of Tiles
+type TileMap map[string]*Tile
 
-// Indices into the CSV file for the BiomeTile fields.
+// Indices into the CSV file for the biome tile fields.
 const (
 	BiomeTileKeyField = iota
 	BiomeTileLatitudeKeyField
@@ -32,36 +33,36 @@ const (
 	BiomeTileBlueStarField
 )
 
-// BiomeTileParseError is the error returned if one of the key fields in the biome data is invalid.
-type BiomeTileParseError struct {
-	InvalidTypeKey     string
-	InvalidLatitudeKey string
-}
+var (
+	errInvalidType        = errors.New("Type must be one of " + BiomeTypeKeys + ".")
+	errInvalidLatitudeKey = errors.New("LatitudeKey must be one of " + LatitudeKeys + ".")
+)
 
-func (e *BiomeTileParseError) Error() string {
-	if e.InvalidTypeKey != "" {
-		return "Type must be one of " + BiomeTypeKeys + " but is " + e.InvalidTypeKey
-	}
-	return "LatitudeKey must be one of " + LatitudeKeys + " but is " + e.InvalidLatitudeKey
-
-}
-
-// Parse takes a Reader containing BiomeTile data in CSV format, parses the data into BiomeTiles, and populates
-// the (pre-made) map with the BiomeTiles.
-func (tiles BiomeTileMap) Parse(r io.Reader) error {
+// Parse takes a Reader containing Tile data in CSV format, parses the data into Tiles, and populates
+// the (pre-made) map with the Tiles. 
+func (tiles TileMap) Parse(r io.Reader) error {
 	csvReader := csv.NewReader(r)
 	records, err := csvReader.ReadAll()
 	if err != nil {
 		return err
 	}
 	for _, record := range records {
-		b := new(BiomeTile)
-		b.Key = record[BiomeTileKeyField]
-		b.LatitudeKey = record[BiomeTileLatitudeKeyField]
+		t := new(Tile)
 
-		if len(b.LatitudeKey) != 1 || !strings.Contains(LatitudeKeys, b.LatitudeKey) {
-			return &BiomeTileParseError{"", b.LatitudeKey}
+		// first get fields common to all Tiles.
+		t.Key = record[BiomeTileKeyField]
+		t.LatitudeKey = record[BiomeTileLatitudeKeyField]
+
+		if len(t.LatitudeKey) != 1 || !strings.Contains(LatitudeKeys, t.LatitudeKey) {
+			return errInvalidLatitudeKey
 		}
+
+		t.Title = record[BiomeTileTitleField]
+		t.Subtitle = record[BiomeTileSubtitleField]
+
+		// now parse out the BiomeTileData.
+		t.BiomeData = new(BiomeTileData)
+		b := t.BiomeData
 
 		switch record[BiomeTileTypeField] {
 		case "L":
@@ -75,12 +76,10 @@ func (tiles BiomeTileMap) Parse(r io.Reader) error {
 			}
 		default:
 			{
-				return &BiomeTileParseError{record[BiomeTileTypeField], ""}
+				return errInvalidType
 			}
 		}
 
-		b.Title = record[BiomeTileTitleField]
-		b.Subtitle = record[BiomeTileSubtitleField]
 		b.ClimaxNumber, err = strconv.Atoi(record[BiomeTileClimaxNumberField])
 		if err != nil {
 			return err
@@ -99,7 +98,7 @@ func (tiles BiomeTileMap) Parse(r io.Reader) error {
 		if err != nil {
 			return err
 		}
-		tiles[b.Key] = b
+		tiles[t.Key] = t
 	}
 	return nil
 }
