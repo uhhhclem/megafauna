@@ -4,8 +4,8 @@ package megafauna
 type Tile struct {
 	Key           string // unique identifier, defined in data
 	IsMesozoic    bool   // if false, tile is Cenozoic
+	Supertitle    string
 	Title         string
-	Subtitle      string
 	LatitudeKey   string             // defined in LatitudeKeys
 	IsLand        bool               // tile is a land biome or terrestrial immigrant
 	IsSea         bool               // tile is a sea biome or aquatic immigrant
@@ -16,12 +16,14 @@ type Tile struct {
 // BiomeTileData contains the data for biome Tiles.
 type BiomeTileData struct {
 	IsOrogeny          bool // true for orogeny biomes			 
+	ClimaxNumber       int
 	Niche              *Niche
 	Requirements       *DNASpec
 	RooterRequirements *DNASpec
 	RedStar            bool
 	BlueStar           bool
-	ClimaxNumber       int
+	IsWarming          bool // true if tile causes warming
+	IsCooling          bool // true if tile causes cooling
 }
 
 // ImmigrantTileData contains the data for immigrant Tiles.

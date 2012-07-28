@@ -36,7 +36,7 @@ func MakeNiche(spec string) (n *Niche, err error) {
 		n.Dentition = int(dentition)
 		return
 	}
-	if len(spec) == 1 && strings.Contains("BGHIANMS", spec) {
+	if len(spec) == 1 && strings.Contains(DietaryDNAKeys+RoadrunnerDNAKeys, spec) {
 		n.DNA = spec
 		return
 	}
