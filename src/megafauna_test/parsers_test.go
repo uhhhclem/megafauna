@@ -30,7 +30,7 @@ func TestBiomeTileMapParse(te *testing.T) {
 	if t.LatitudeKey != "O" {
 		te.Errorf("Expected tile 1 to be in the O latitude.")
 	}
-	if !b.IsOrogeny || b.IsWater || !b.IsLand {
+	if !b.IsOrogeny || t.IsWater || !t.IsLand {
 		te.Errorf("Expected tile 1 to be an orogeny tile.")
 	}
 
@@ -40,7 +40,7 @@ func TestBiomeTileMapParse(te *testing.T) {
 	if t.LatitudeKey != "T" {
 		te.Errorf("Expected tile 2 to be in the T latitude.")
 	}
-	if b.IsOrogeny || b.IsWater || !b.IsLand {
+	if b.IsOrogeny || t.IsWater || !t.IsLand {
 		te.Errorf("Expected tile 2 to be a land tile.")
 	}
 

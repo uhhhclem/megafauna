@@ -3,19 +3,19 @@ package megafauna
 // Tile represents a Biome or Immigrant tile.
 type Tile struct {
 	Key           string // unique identifier, defined in data
+	IsMesozoic    bool               // if false, tile is Cenozoic
 	Title         string
 	Subtitle      string
 	LatitudeKey   string             // defined in LatitudeKeys
-	IsMesozoic    bool               // if false, tile is Cenozoic
+	IsLand             bool			// tile is a land biome or terrestrial immigrant
+	IsWater            bool			// tile is a water biome or aquatic immigrant
 	BiomeData     *BiomeTileData     // if present, this is a biome tile
 	ImmigrantData *ImmigrantTileData // if present, this is an immigrant tile
 }
 
 // BiomeTileData contains the data for biome Tiles.
 type BiomeTileData struct {
-	IsLand             bool
-	IsWater            bool
-	IsOrogeny          bool
+	IsOrogeny          bool		// true for orogeny biomes			 
 	Niche              *Niche
 	Requirements       *DNASpec
 	RooterRequirements *DNASpec
@@ -26,6 +26,7 @@ type BiomeTileData struct {
 
 // ImmigrantTileData contains the data for immigrant Tiles.
 type ImmigrantTileData struct {
+	Size	int
 	IsHerbivore bool // if false, immigrant is a 1-tooth predator
 	DNA         *DNASpec
 }

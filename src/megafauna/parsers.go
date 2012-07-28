@@ -66,18 +66,17 @@ func (tiles TileMap) Parse(r io.Reader) error {
 
 		switch record[BiomeTileTypeField] {
 		case "L":
-			b.IsLand = true
+			t.IsLand = true
 		case "W":
-			b.IsWater = true
+			t.IsWater = true
 		case "O":
-			{
-				b.IsLand = true
-				b.IsOrogeny = true
-			}
+			t.IsLand = true
+			b.IsOrogeny = true
+		case "B":
+			t.IsLand=true
+			t.IsWater=true			
 		default:
-			{
-				return errInvalidType
-			}
+			return errInvalidType
 		}
 
 		b.ClimaxNumber, err = strconv.Atoi(record[BiomeTileClimaxNumberField])
