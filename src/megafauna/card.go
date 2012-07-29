@@ -1,6 +1,13 @@
 package megafauna
 
-// MutationCard represents a mutation card
+type Card struct {
+	Key      string
+	Event    *Event
+	Mutation *MutationCard
+	Genotype *GenotypeCard
+}
+
+// MutationCard contains mutation-card-specific fields.
 type MutationCard struct {
 	MinSize     int
 	MaxSize     int
@@ -10,17 +17,16 @@ type MutationCard struct {
 	Title       string // the large text on the card
 	Subtitle    string // the small text on the card - note this can be quite long
 	Reminder    string // a few mutation cards have reminders, e.g. Caudal Fin
-	Event       *Event
 }
 
-// GenotypeCard represents a genotype card.
+// GenotypeCard contains genotype-card-specific fields.
 type GenotypeCard struct {
 	MammalData   *GenotypeCardData
 	DinosaurData *GenotypeCardData
 	Event        *Event
 }
 
-// GenotypeCardData represents the data in one half of a genotype card.
+// GenotypeCardData represents the data in one half of a genotype Card.
 type GenotypeCardData struct {
 	SilhouetteIndex int
 	MinSize         int
@@ -31,7 +37,7 @@ type GenotypeCardData struct {
 	Subtitle        string
 }
 
-// Event represents the event portion of a card.
+// Event represents the event portion of a Card.
 type Event struct {
 	IsDrawTwo               bool
 	IsMilankovich           bool

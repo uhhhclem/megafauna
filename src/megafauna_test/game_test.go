@@ -25,19 +25,25 @@ func TestSortPlayers(t *testing.T) {
 
 func TestNewGame_Players(t *testing.T) {
 	var g *megafauna.Game
+	var err error
 
-	g = megafauna.NewGame([]string{""})
-	if g != nil {
-		t.Error("Shouldn't create a game if there aren't enough names.")
-		return
-	}
-	g = megafauna.NewGame([]string{"A", "B", "C", "D", "E"})
-	if g != nil {
-		t.Error("Shouldn't create a game if there aren't too many names.")
+	g, err = megafauna.NewGame([]string{""})
+	if err == nil {
+		t.Error("Should have gotten an error (no players) and didn't.")
 		return
 	}
 
-	g = megafauna.NewGame([]string{"Matthew", "Mark", "Luke", "John"})
+	g, err = megafauna.NewGame([]string{"A", "B", "C", "D", "E"})
+	if err == nil {
+		t.Error("Should have gotten an error (too many players) and didn't.")
+		return
+	}
+
+	g, err = megafauna.NewGame([]string{"Matthew", "Mark", "Luke", "John"})
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	if len(g.Players) != 4 {
 		t.Error("g.Players isn't the right length.")
 		return
@@ -72,7 +78,11 @@ func TestNewGame_Players(t *testing.T) {
 		t.Error("Didn't find all 4 colors, somehow.")
 	}
 
-	g = megafauna.NewGame([]string{"Tinker", "Evers", "Chance"})
+	g, err = megafauna.NewGame([]string{"Tinker", "Evers", "Chance"})
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	var prevDentition int
 	for _, p := range g.Players {
 		if p.Dentition < prevDentition {
@@ -81,30 +91,21 @@ func TestNewGame_Players(t *testing.T) {
 		}
 		prevDentition = p.Dentition
 	}
-}
 
-func TestGetCard(t *testing.T) {
-	g := megafauna.NewGame([]string{"Dick", "Jane"})
-
-	if len(g.CardKeys) < 10 {
-		t.Error("There should be at least 10 cards.")
-		return
+	if len(g.CardKeys) != len(g.Cards) {
+		t.Error("CardKeys and Cards aren't the same length.")
 	}
-	for _, k := range g.CardKeys {
-		mut, gen := g.GetCard(k)
-		if mut == nil && gen == nil {
-			t.Error("We should always get either a mutation or a genotype card.")
-			return
-		}
-		if mut != nil && gen != nil {
-			t.Error("Only one of the objects returned should have a value.")
-			return
-		}
+	if len(g.MesozoicTileKeys)+len(g.CenozoicTileKeys) != len(g.Tiles) {
+		t.Error("Tile keys and Tiles aren't the same length.")
 	}
 }
 
 func TestGetPlayer(t *testing.T) {
-	g := megafauna.NewGame([]string{"John", "Paul", "George", "Ringo"})
+	g, err := megafauna.NewGame([]string{"John", "Paul", "George", "Ringo"})
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	for _, d := range []int{2, 3, 4, 5} {
 		p := g.GetPlayer(d)
 		if p == nil || p.Dentition != d {

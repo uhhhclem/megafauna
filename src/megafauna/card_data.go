@@ -12,6 +12,33 @@ import (
 var DinosaurSilhouettes = []string{"dino", "fin", "bird", "croc"}
 var MammalSilhouettes = []string{"cat", "rhino", "bat", "dolphin"}
 
+var (
+	ErrInvalidEventType        = errors.New("Invalid event type.")
+	ErrInvalidLatitudeKey      = errors.New("Invalid latitude key.")
+	ErrInvalidDNASpec          = errors.New("Invalid DNA spec.")
+	ErrInvalidInstinctKey      = errors.New("Invalid instinct key.")
+	ErrInvalidCatastropheLevel = errors.New("Invalid catastrophe level.")
+	ErrInvalidMinSize          = errors.New("Invalid minimum size.")
+	ErrInvalidMaxSize          = errors.New("Invalid maximum size.")
+	ErrInvalidSilhouetteAbbrev = errors.New("Invalid silhouette abbreviation.")
+)
+
+// GetCards builds the master map of all Cards.
+func GetCards() (map[string]*Card, error) {
+	cards := make(map[string]*Card)
+	reader := strings.NewReader(mutationCardSourceData)
+	err := parseMutationCards(reader, cards)
+	if err != nil {
+		return nil, err
+	}
+	reader = strings.NewReader(genotypeCardSourceData)
+	err = parseGenotypeCards(reader, cards)
+	if err != nil {
+		return nil, err
+	}
+	return cards, nil
+}
+
 // Indices into the CSV data for the mutation cards
 const (
 	mutationCardKeyField = iota
@@ -29,20 +56,9 @@ const (
 	mutationCardMilankovichLatitudesField
 )
 
-var (
-	ErrInvalidEventType        = errors.New("Invalid event type.")
-	ErrInvalidLatitudeKey      = errors.New("Invalid latitude key.")
-	ErrInvalidDNASpec          = errors.New("Invalid DNA spec.")
-	ErrInvalidInstinctKey      = errors.New("Invalid instinct key.")
-	ErrInvalidCatastropheLevel = errors.New("Invalid catastrophe level.")
-	ErrInvalidMinSize          = errors.New("Invalid minimum size.")
-	ErrInvalidMaxSize          = errors.New("Invalid maximum size.")
-	ErrInvalidSilhouetteAbbrev = errors.New("Invalid silhouette abbreviation.")
-)
-
-// ParseMutationCards parses CSV data from the Reader and puts the resulting MutationCard objects in the
+// parseMutationCards parses CSV data from the Reader and puts the resulting MutationCard objects in the
 // cards map.
-func ParseMutationCards(r io.Reader, cards map[string]interface{}) error {
+func parseMutationCards(r io.Reader, cards map[string]*Card) error {
 	csvReader := csv.NewReader(r)
 	csvReader.TrailingComma = true
 	records, err := csvReader.ReadAll()
@@ -50,8 +66,12 @@ func ParseMutationCards(r io.Reader, cards map[string]interface{}) error {
 		return err
 	}
 	for _, record := range records {
+		c := new(Card)
 		m := new(MutationCard)
-		key := record[mutationCardKeyField]
+		c.Mutation = m
+
+		c.Key = record[mutationCardKeyField]
+
 		m.MinSize, err = strconv.Atoi(record[mutationCardMinSizeField])
 		if err != nil {
 			return ErrInvalidMinSize
@@ -84,17 +104,18 @@ func ParseMutationCards(r io.Reader, cards map[string]interface{}) error {
 			}
 		}
 		catWarming := (record[mutationCardCatastropheIsWarmingField] == "T")
-		m.Event, err = MakeEvent(record[mutationCardEventTypeField], record[mutationCardMilankovichLatitudesField], catLevel, catWarming)
+		c.Event, err = makeEvent(record[mutationCardEventTypeField], record[mutationCardMilankovichLatitudesField], catLevel, catWarming)
 		if err != nil {
 			return err
 		}
-		m.Event.Description = record[mutationCardEventDescriptionField]
-		cards[key] = m
+		c.Event.Description = record[mutationCardEventDescriptionField]
+
+		cards[c.Key] = c
 	}
 	return nil
 }
 
-// Indices into the CSV data for the mutation cards
+// Indices into the CSV data for the genotype cards
 const (
 	genotypeCardKeyField = iota
 	genotypeCardMSilhouetteField
@@ -118,8 +139,8 @@ const (
 	genotypeCardMilankovichLatitudesField
 )
 
-// Parse parses CSV data from the Reader passed in into the receiver GenotypeCardMap.
-func ParseGenotypeCards(r io.Reader, cards map[string]interface{}) error {
+// parseGenotypeCards parses CSV data from the Reader passed in into the receiver Card map
+func parseGenotypeCards(r io.Reader, cards map[string]*Card) error {
 	csvReader := csv.NewReader(r)
 	csvReader.TrailingComma = true
 	records, err := csvReader.ReadAll()
@@ -129,8 +150,12 @@ func ParseGenotypeCards(r io.Reader, cards map[string]interface{}) error {
 	for _, record := range records {
 		var err error
 		var data *GenotypeCardData
+		c := new(Card)
+		c.Key = record[genotypeCardKeyField]
+
 		g := new(GenotypeCard)
-		key := record[genotypeCardKeyField]
+		c.Genotype = g
+
 		data, err = parseGenotypeData(record, genotypeCardMSilhouetteField)
 		if err != nil {
 			return err
@@ -150,18 +175,18 @@ func ParseGenotypeCards(r io.Reader, cards map[string]interface{}) error {
 			}
 		}
 		catWarming := (record[genotypeCardCatastropheIsWarmingField] == "T")
-		g.Event, err = MakeEvent(record[genotypeCardEventTypeField], record[genotypeCardMilankovichLatitudesField], catLevel, catWarming)
+		c.Event, err = makeEvent(record[genotypeCardEventTypeField], record[genotypeCardMilankovichLatitudesField], catLevel, catWarming)
 		if err != nil {
 			return err
 		}
-		g.Event.Description = record[genotypeCardEventDescriptionField]
-		cards[key] = g
+		c.Event.Description = record[genotypeCardEventDescriptionField]
+		cards[c.Key] = c
 	}
 	return nil
 }
 
-// ConvertSilhouette returns the silhouette index for an abbreviation.
-func ConvertSilhouette(abbrev string, isDinosaur bool) (int, error) {
+// convertSilhouette returns the silhouette index for an abbreviation.
+func convertSilhouette(abbrev string, isDinosaur bool) (int, error) {
 	silhouettes := MammalSilhouettes
 	if isDinosaur {
 		silhouettes = DinosaurSilhouettes
@@ -181,7 +206,7 @@ func parseGenotypeData(record []string, startField int) (*GenotypeCardData, erro
 	g := new(GenotypeCardData)
 
 	isDinosaur := !(startField == genotypeCardMSilhouetteField)
-	silhouette, err = ConvertSilhouette(record[startField], isDinosaur)
+	silhouette, err = convertSilhouette(record[startField], isDinosaur)
 	startField++
 	if err != nil {
 		return nil, err
@@ -213,7 +238,7 @@ func parseGenotypeData(record []string, startField int) (*GenotypeCardData, erro
 }
 
 // MakeEvent creates an event from the appropriate fields in the card data.  Returns error if the data is invalid
-func MakeEvent(eventType string, milankovichLatitude string, catastropheLevel int, catastropheIsWarming bool) (*Event, error) {
+func makeEvent(eventType string, milankovichLatitude string, catastropheLevel int, catastropheIsWarming bool) (*Event, error) {
 
 	var e Event
 	eventKey := eventType[0]
@@ -242,7 +267,7 @@ func MakeEvent(eventType string, milankovichLatitude string, catastropheLevel in
 }
 
 // CSV data for the mutation cards.
-const MutationCardSourceData = `M1,1,6,S,,Breathing while running,Carrier's Constant Diaphragm,,T,,,,
+const mutationCardSourceData = `M1,1,6,S,,Breathing while running,Carrier's Constant Diaphragm,,T,,,,
 M2,1,4,SS,,Unidirectional respiration,Flow-Through Lungs,Shown is the bird system.,C,Asteroid impact global cooling,5,FALSE,
 M3,1,4,PP,,Homoiotherm,Feathers,"A better insulator than fur, but prone to parasites and matting.",T,,,,
 M4,1,5,B,M,Pubic bone shift,Biped Stance,,T,,,,
@@ -263,7 +288,7 @@ M18,2,3,AA,,,Saber Tooth,These animals lunged from ambush to eviscerate the bell
 M19,1,5,A,,Heterodont,Scimitar Incisors Carnassial Molars,,T,,,,
 M20,1,1,GI,,Dilambodont Cheek Teeth,"W-shaped teeth used by shrews, moles, and bats.",,T,,,,`
 
-const GenotypeCardSourceData = `G1,cat,Carnivora,Feloids,cats,1,3,PN,dino,Saurischian theropod,Ostrich dinosaurs,"oviraptors, ornithomimids",1,5,PS,MP,,,,HA
+const genotypeCardSourceData = `G1,cat,Carnivora,Feloids,cats,1,3,PN,dino,Saurischian theropod,Ostrich dinosaurs,"oviraptors, ornithomimids",1,5,PS,MP,,,,HA
 G2,cat,Pholidota,Pangolins,,1,2,IA,fin,Crurotarsi,Aetosaurs,,1,3,AN,T,,,,
 G3,rhino,Artodactyl ungulate,Swine,"pigs, hippos",1,4,GP,dino,Ornithischian ornithopod,Duckbills,"lambeosaurines, iguanodonts, hadrosaurs",2,5,GG,T,,,,
 G4,dolphin,Sirenia,Sea Cows,"dugongs, manatees",1,5,GM,croc,Diapsid reptile,Nothosaurs,,1,3,NM,T,,,,

@@ -1,17 +1,25 @@
 package megafauna
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"strconv"
-	"strings"
+)
+
+var (
+	ErrCardNotFound   = errors.New("Card not found.")
+	ErrInvalidPlayers = errors.New("Invalid player list.")
 )
 
 // Game is one discrete game of Bios Megafauna.
 type Game struct {
-	Players  SortablePlayerCollection // slice of Player objects, in player order
-	Cards    map[string]interface{}
-	CardKeys []string // shuffled slice of keys to all cards
+	Players          SortablePlayerCollection // slice of Player objects, in player order
+	Cards            map[string]*Card
+	CardKeys         []string // shuffled slice of keys to all cards
+	Tiles            map[string]*Tile
+	MesozoicTileKeys []string // shuffled slice of keys to the Mesozoic tiles.
+	CenozoicTileKeys []string // shuffled slice of keys to the Cenozoic tiles.
 }
 
 // SortablePlayerCollection is used to sort Players by Dentition.
@@ -33,14 +41,23 @@ func (p SortablePlayerCollection) Swap(i, j int) {
 }
 
 // NewGame creates a new Game and initializes the Players.
-func NewGame(names []string) *Game {
+func NewGame(names []string) (*Game, error) {
+	var err error
+
 	g := new(Game)
 	g.createPlayers(names)
 	if g.Players == nil {
-		return nil
+		return nil, ErrInvalidPlayers
 	}
-	g.createCards()
-	return g
+	err = g.createCards()
+	if err != nil {
+		return nil, err
+	}
+	err = g.createTiles()
+	if err != nil {
+		return nil, err
+	}
+	return g, nil
 }
 
 // createPlayers creates the Player objects in the game from a list of their names.  If it fails, Players will be nil.
@@ -86,13 +103,14 @@ func (g *Game) createPlayers(names []string) {
 }
 
 // createCards initializes the deck.
-func (g *Game) createCards() {
+func (g *Game) createCards() error {
+	var err error
+
 	// get the mutation cards
-	g.Cards = make(map[string]interface{})
-	r := strings.NewReader(MutationCardSourceData)
-	ParseMutationCards(r, g.Cards)
-	r = strings.NewReader(GenotypeCardSourceData)
-	ParseGenotypeCards(r, g.Cards)
+	g.Cards, err = GetCards()
+	if err != nil {
+		return err
+	}
 
 	// get their keys and shuffle them
 	g.CardKeys = make([]string, 0)
@@ -100,18 +118,32 @@ func (g *Game) createCards() {
 		g.CardKeys = append(g.CardKeys, k)
 	}
 	Shuffle(g.CardKeys)
+	return nil
 }
 
-// GetCard returns the MutationCard or GenotypeCard for a given key.
-func (g *Game) GetCard(key string) (*MutationCard, *GenotypeCard) {
-	switch g.Cards[key].(type) {
-	case *MutationCard:
-		return g.Cards[key].(*MutationCard), nil
-	case *GenotypeCard:
-		return nil, g.Cards[key].(*GenotypeCard)
+// createTiles initializes the tile stacks.
+func (g *Game) createTiles() error {
+	var err error
+
+	// get the tiles
+	g.Tiles, err = GetTiles()
+	if err != nil {
+		return err
 	}
-	panic("Something's not right in Cards.")
-	return nil, nil
+
+	// get the keys for the two stacks of tiles and shuffle them
+	g.MesozoicTileKeys = make([]string, 0)
+	g.CenozoicTileKeys = make([]string, 0)
+	for k, t := range g.Tiles {
+		if t.IsMesozoic {
+			g.MesozoicTileKeys = append(g.MesozoicTileKeys, k)
+		} else {
+			g.CenozoicTileKeys = append(g.CenozoicTileKeys, k)
+		}
+	}
+	Shuffle(g.MesozoicTileKeys)
+	Shuffle(g.CenozoicTileKeys)
+	return nil
 }
 
 // GetPlayer returns the Player with the given dentition.
