@@ -41,9 +41,10 @@ type GenotypeCardData struct {
 type Event struct {
 	IsDrawTwo               bool
 	IsMilankovich           bool
+	IsWarming               bool
+	IsCooling               bool
 	MilankovichLatitudeKeys []string
 	IsCatastrophe           bool
 	CatastropheLevel        int
-	CatastropheIsWarming    bool
 	Description             string
 }

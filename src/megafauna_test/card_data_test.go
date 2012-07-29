@@ -59,7 +59,7 @@ func checkMutationCards(t *testing.T, cards map[string]*megafauna.Card) {
 			if card.Event.CatastropheLevel != 5 {
 				t.Error("Should be a level 5 catastrophe.")
 			}
-			if card.Event.CatastropheIsWarming {
+			if card.Event.IsWarming {
 				t.Error("Should be a global-cooling catastrophe.")
 			}
 		}

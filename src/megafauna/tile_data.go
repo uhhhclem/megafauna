@@ -3,6 +3,7 @@ package megafauna
 import (
 	"encoding/csv"
 	"errors"
+	"fmt"
 	"io"
 	"strconv"
 	"strings"
@@ -146,7 +147,12 @@ func parseimmigrantTiles(r io.Reader, tiles map[string]*Tile) error {
 	if err != nil {
 		return err
 	}
-	for _, record := range records {
+
+	fmterr := func(index int, err error) error {
+		return fmt.Errorf("Line %v: %v", index+1, err.Error())
+	}
+
+	for index, record := range records {
 		t := new(Tile)
 		t.ImmigrantData = new(ImmigrantTileData)
 		i := t.ImmigrantData
@@ -154,13 +160,13 @@ func parseimmigrantTiles(r io.Reader, tiles map[string]*Tile) error {
 		t.Key = record[immigrantTileKeyField]
 		t.IsMesozoic, err = strconv.ParseBool(record[immigrantTileIsMesozoicField])
 		if err != nil {
-			return nil
+			return fmterr(index, err)
 		}
 
 		t.LatitudeKey = record[immigrantTileLatitudeKeyField]
 
 		if len(t.LatitudeKey) != 1 || !strings.Contains(LatitudeKeys, t.LatitudeKey) {
-			return errInvalidLatitudeKey
+			return fmterr(index, errInvalidLatitudeKey)
 		}
 
 		t.Supertitle = record[immigrantTileSupertitleField]
@@ -168,11 +174,11 @@ func parseimmigrantTiles(r io.Reader, tiles map[string]*Tile) error {
 
 		t.IsLand, err = strconv.ParseBool(record[immigrantTileIsLandField])
 		if err != nil {
-			return nil
+			return fmterr(index, err)
 		}
 		t.IsSea, err = strconv.ParseBool(record[immigrantTileIsSeaField])
 		if err != nil {
-			return err
+			return fmterr(index, err)
 		}
 
 		size := record[immigrantTileSizeField]
@@ -182,7 +188,7 @@ func parseimmigrantTiles(r io.Reader, tiles map[string]*Tile) error {
 			i.IsHerbivore = true
 			i.Size, err = strconv.Atoi(size)
 			if err != nil {
-				return err
+				return fmterr(index, err)
 			}
 		}
 

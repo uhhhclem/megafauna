@@ -14,9 +14,18 @@ var (
 
 // Game is one discrete game of Bios Megafauna.
 type Game struct {
-	Players          SortablePlayerCollection // slice of Player objects, in player order
-	Cards            map[string]*Card
-	CardKeys         []string // shuffled slice of keys to all cards
+	Players SortablePlayerCollection // slice of Player objects, in player order
+	// card-related fields
+	Cards                map[string]*Card
+	CardKeys             []string // shuffled slice of keys to all cards
+	TriassicCardKeys     []string
+	JurassicCardKeys     []string
+	CretaceousCardKeys   []string
+	TertiaryCardKeys     []string
+	UpperDisplayCardKeys []string
+	LowerDisplayCardKeys []string
+	LowerDisplayGenes    []int
+	// tile-related fields
 	Tiles            map[string]*Tile
 	MesozoicTileKeys []string // shuffled slice of keys to the Mesozoic tiles.
 	CenozoicTileKeys []string // shuffled slice of keys to the Cenozoic tiles.
@@ -118,7 +127,32 @@ func (g *Game) createCards() error {
 		g.CardKeys = append(g.CardKeys, k)
 	}
 	Shuffle(g.CardKeys)
+
+	// deal out the initial stacks
+	g.TriassicCardKeys = g.dealCards(len(g.Players) * 3)
+	g.JurassicCardKeys = g.dealCards(5)
+	g.CretaceousCardKeys = g.dealCards(8)
+	g.TertiaryCardKeys = g.dealCards(7)
+	g.UpperDisplayCardKeys = g.dealCards(5)
+	g.LowerDisplayCardKeys = g.dealCards(5)
+	g.LowerDisplayGenes = make([]int, 5)
 	return nil
+}
+
+// dealCards "deals" keys from CardKeys to the various stacks.
+func (g *Game) dealCards(amount int) []string {
+	stack := make([]string, 0)
+	for i := 0; i < amount; i++ {
+		key := g.CardKeys[0]
+		stack = append(stack, key)
+		// was that the last card in the deck?
+		if len(g.CardKeys) == 1 {
+			g.CardKeys = make([]string, 0)
+			break
+		}
+		g.CardKeys = g.CardKeys[1:]
+	}
+	return stack
 }
 
 // createTiles initializes the tile stacks.

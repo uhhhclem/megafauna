@@ -3,6 +3,7 @@ package megafauna
 import (
 	"encoding/csv"
 	"errors"
+	"fmt"
 	"io"
 	"strconv"
 	"strings"
@@ -13,7 +14,6 @@ var DinosaurSilhouettes = []string{"dino", "fin", "bird", "croc"}
 var MammalSilhouettes = []string{"cat", "rhino", "bat", "dolphin"}
 
 var (
-	ErrInvalidEventType        = errors.New("Invalid event type.")
 	ErrInvalidLatitudeKey      = errors.New("Invalid latitude key.")
 	ErrInvalidDNASpec          = errors.New("Invalid DNA spec.")
 	ErrInvalidInstinctKey      = errors.New("Invalid instinct key.")
@@ -65,7 +65,12 @@ func parseMutationCards(r io.Reader, cards map[string]*Card) error {
 	if err != nil {
 		return err
 	}
-	for _, record := range records {
+
+	fmterr := func(index int, err error) error {
+		return fmt.Errorf("Line %v: %v", index+1, err.Error())
+	}
+
+	for index, record := range records {
 		c := new(Card)
 		m := new(MutationCard)
 		c.Mutation = m
@@ -74,22 +79,22 @@ func parseMutationCards(r io.Reader, cards map[string]*Card) error {
 
 		m.MinSize, err = strconv.Atoi(record[mutationCardMinSizeField])
 		if err != nil {
-			return ErrInvalidMinSize
+			return fmterr(index, ErrInvalidMinSize)
 		}
 		m.MaxSize, err = strconv.Atoi(record[mutationCardMaxSizeField])
 		if err != nil {
-			return ErrInvalidMaxSize
+			return fmterr(index, ErrInvalidMaxSize)
 		}
 		instinct := record[mutationCardInstinctField]
 		if instinct != "" {
 			if len(instinct) != 1 || !strings.Contains(InstinctKeys, instinct) {
-				return ErrInvalidInstinctKey
+				return fmterr(index, ErrInvalidInstinctKey)
 			}
 			m.InstinctKey = instinct
 		}
 		m.Mutation = MakeDNASpec(record[mutationCardMutationField])
 		if m.Mutation == nil {
-			return ErrInvalidDNASpec
+			return fmterr(index, ErrInvalidDNASpec)
 		}
 
 		m.Supertitle = record[mutationCardSupertitleField]
@@ -100,13 +105,13 @@ func parseMutationCards(r io.Reader, cards map[string]*Card) error {
 		if record[mutationCardCatastropheLevelField] != "" {
 			catLevel, err = strconv.Atoi(record[mutationCardCatastropheLevelField])
 			if err != nil {
-				return ErrInvalidCatastropheLevel
+				return fmterr(index, ErrInvalidCatastropheLevel)
 			}
 		}
 		catWarming := (record[mutationCardCatastropheIsWarmingField] == "T")
 		c.Event, err = makeEvent(record[mutationCardEventTypeField], record[mutationCardMilankovichLatitudesField], catLevel, catWarming)
 		if err != nil {
-			return err
+			return fmterr(index, err)
 		}
 		c.Event.Description = record[mutationCardEventDescriptionField]
 
@@ -237,21 +242,32 @@ func parseGenotypeData(record []string, startField int) (*GenotypeCardData, erro
 	return g, nil
 }
 
-// MakeEvent creates an event from the appropriate fields in the card data.  Returns error if the data is invalid
+// makeEvent creates an event from the appropriate fields in the card data.  Returns error if the data is invalid.
 func makeEvent(eventType string, milankovichLatitude string, catastropheLevel int, catastropheIsWarming bool) (*Event, error) {
 
 	var e Event
 	eventKey := eventType[0]
+	err := fmt.Errorf("\"%v\" is an invalid event type.", eventType)
 
 	switch {
+	default:
+		return nil, err
 	case eventKey == 'T':
 		e.IsDrawTwo = true
-		return &e, nil
+	case eventKey == 'G': // can be "GW" or "GC" for global warming or cooling
+		if len(eventType) < 2 {
+			return nil, err
+		}
+		e.IsWarming = eventType[1] == 'W'
+		e.IsCooling = eventType[1] == 'C'
+		if !e.IsWarming && !e.IsCooling {
+			return nil, err
+		}
 	case eventKey == 'C':
 		e.IsCatastrophe = true
 		e.CatastropheLevel = catastropheLevel
-		e.CatastropheIsWarming = catastropheIsWarming
-		return &e, nil
+		e.IsWarming = catastropheIsWarming
+		e.IsCooling = !catastropheIsWarming
 	case eventKey == 'M':
 		e.IsMilankovich = true
 		e.MilankovichLatitudeKeys = make([]string, len(milankovichLatitude))
@@ -261,9 +277,8 @@ func makeEvent(eventType string, milankovichLatitude string, catastropheLevel in
 			}
 			e.MilankovichLatitudeKeys[index] = string(key)
 		}
-		return &e, nil
 	}
-	return nil, ErrInvalidEventType
+	return &e, nil
 }
 
 // CSV data for the mutation cards.
@@ -286,7 +301,53 @@ M16,1,4,PP,,Homoiothermic,Fur,Homoiotherms maintain a constant body temperature 
 M17,1,2,II,,,Anteater Tongue,,C,Solar Flare global cooling,7,FALSE,
 M18,2,3,AA,,,Saber Tooth,These animals lunged from ambush to eviscerate the belly of their prey.,T,,,,
 M19,1,5,A,,Heterodont,Scimitar Incisors Carnassial Molars,,T,,,,
-M20,1,1,GI,,Dilambodont Cheek Teeth,"W-shaped teeth used by shrews, moles, and bats.",,T,,,,`
+M20,1,1,GI,,Dilambodont Cheek Teeth,"W-shaped teeth used by shrews, moles, and bats.",,T,,,,
+M21,1,6,P,L,Encephalization,Forebrain,,T,,,,
+M22,1,6,P,L,Intraspecies,Communication,,T,,,,
+M23,1,4,SS,,Unguligrade,Hooves,Keratin-reinforced toe-tips are used by swift animals from deer to land crocodiles.,GC,Erosion global cooling,,,
+M24,1,1,AA,,Expendable,Spines,,C,Clathrate Gun global warming,4,TRUE,
+M25,1,6,,S,Scent gland marking,Courtship & Territorialism,,T,,,,
+M26,1,6,PS,,Endocrine hormones,Pituitary and Thyroid Glands,,T,,,,
+M27,1,6,P,,Fatty,Hump,,T,,,,
+M28,2,6,BG,,,Hindgut Digestion,"To digest leaves, and elongated intestine and colon plus an enlarged cecum to host bacteria are needed.",T,,,,
+M29,1,6,BG,,,"Cheeks, Palate, and Tongue",Cheeks retain food during chewing.  Palate allows simultaneous breathing & chewing.,T,,,,
+M30,1,3,IN,L,Land or sea sonar,Echolocation,,T,,,,
+M31,1,1,HG,,Crop,Foregut Digestion,,T,,,,
+M32,1,6,MM,,Natatorial lunate,Caudal Fin,This shape is optimized for cruising.,T,,,,
+M33,1,6,AS,,Fight or Flight hormones,Adrenal Glands,,T,,,,
+M34,1,2,BI,M,,Opposable Thumb,Shown is the hand of a panda.,T,,,,
+M35,3,6,PM,,Homoiotherm,Blubber,,T,,,,
+M36,1,6,G,,,Lophodont Cheek Teeth,The addition of hard enamel ridges to teeth improves their grinding action.,T,,,,
+M37,1,6,,L,Cooperative,Flushing or Mobbing,"One hunter flushes, the other pounces.  Prey may harass predators in mobs.",ME,,,,T
+M38,1,2,P,N,Seasonal,Food Storage,Squirrels and woodpeckers act as seed-dispersing agents for oak trees.,T,,,,
+M39,1,6,M,,,Salt-excreting Tubenose,The tubes on some seabird beaks allows them to drink seawater.,GC,Erosion global cooling,,,
+M40,1,4,N,,"Hammer, anvil, and stirrup bones",Directional Ears,Mammal evolution reshaped 3 jawbones to form a chain of auditory bones.,GC,Erosion global cooling,,,
+M41,1,2,N,,Chromatophore,Camouflage,,T,,,,
+M42,2,5,A,,Disemboweling,Switchblade Claw,,T,,,,
+M43,1,6,,S,Mating Call,Vocal Amplifier,,C,X-Ray Burdeter global cooling,6,FALSE,
+M44,1,2,IN,N,Rodent den excavation,Digging Claws,,MT,,,,J
+M45,1,6,P,S,"Herds, Flocks, or Packs",Seasonal Migration,"As the world got more seasonal, animals responded by going south for the winter.",T,,,,
+M46,2,6,,S,"Antlers, boneheads, & horns",Head Butting,,T,,,,
+M47,1,4,M,,Cardiform,Needle Teeth,These teeth are better adapted for seizing slippery fish than tackling a land animal.,T,,,,
+M48,1,6,N,,Light sensitive rods,Night Binocular Vision,,ME,,,,T
+M49,1,6,M,,Natatorial,Web Feet,,GC,,,,
+M50,1,6,BG,,Gastric Mill,Gizzard Stones,"Some animals, from brontosaurs to pigeons, swallow stones to grind food.",T,,,,
+M51,1,2,IM,N,Electroreceptive,Rooting Snout,,T,,,,
+M52,1,6,,S,,Lek,Leks are social arenas where males assemble to perform courtship displays.,T,,,,
+M53,2,6,B,M,Prehensile,Trunk,,GC,,,,
+M54,2,5,P,,Thermoregulation,Sail Back,,T,,,,
+M55,1,6,N,N,Olfactory receptor,Bloodhound Nose,,T,,,,
+M56,1,1,H,,,Grawing Incisors,Rodents have a set of continuously growing incisors that must be kept short by gnawing.,T,,,,
+M57,1,3,AA,,,Plate Armor,A turtle's spine and ribs are fused to interlocking bony plates under the skin.,GC,,,,
+M58,3,6,AA,,,Tail Club,,T,,,,
+M59,1,6,S,L,Sentry,Warning Cry,,T,,,,
+M60,1,6,B,M,,Prehensile Tongue,,T,,,,
+M61,1,5,M,M,Water vascular,Tentacles,,T,,,,
+M62,1,5,P,M,,Nest Building,,MP,,,,HA
+M63,2,6,AA,,,Nose Horn,,T,,,,
+M64,2,3,BGG,,,Cud-chewing,Ruminents are mammals that return food from the reticulorumen foregut to be chewed for additional processing.,T,,,,
+M65,1,6,BA,,Horny,Beak,,T,,,,
+M66,1,2,MN,,Serpentine,Vermiform,,T,,,,`
 
 const genotypeCardSourceData = `G1,cat,Carnivora,Feloids,cats,1,3,PN,dino,Saurischian theropod,Ostrich dinosaurs,"oviraptors, ornithomimids",1,5,PS,MP,,,,HA
 G2,cat,Pholidota,Pangolins,,1,2,IA,fin,Crurotarsi,Aetosaurs,,1,3,AN,T,,,,

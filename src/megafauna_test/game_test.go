@@ -92,8 +92,17 @@ func TestNewGame_Players(t *testing.T) {
 		prevDentition = p.Dentition
 	}
 
-	if len(g.CardKeys) != len(g.Cards) {
-		t.Error("CardKeys and Cards aren't the same length.")
+	var stacks int
+	stacks += len(g.CardKeys)
+	stacks += len(g.TriassicCardKeys)
+	stacks += len(g.JurassicCardKeys)
+	stacks += len(g.CretaceousCardKeys)
+	stacks += len(g.TertiaryCardKeys)
+	stacks += len(g.UpperDisplayCardKeys)
+	stacks += len(g.LowerDisplayCardKeys)
+
+	if len(g.Cards) != stacks {
+		t.Errorf("There are %v keys in Cards but %v in the stacks.", len(g.Cards), stacks)
 	}
 	if len(g.MesozoicTileKeys)+len(g.CenozoicTileKeys) != len(g.Tiles) {
 		t.Error("Tile keys and Tiles aren't the same length.")
