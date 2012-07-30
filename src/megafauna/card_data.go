@@ -355,5 +355,23 @@ G3,rhino,Artodactyl ungulate,Swine,"pigs, hippos",1,4,GP,dino,Ornithischian orni
 G4,dolphin,Sirenia,Sea Cows,"dugongs, manatees",1,5,GM,croc,Diapsid reptile,Nothosaurs,,1,3,NM,T,,,,
 G5,rhino,Marsupial,Diprotodonts,"kangaroos, wombats",1,5,BS,croc,Crurotarsi,Crocodiles,,1,4,AM,T,,,,
 G6,bat,Anthropoidea,Primates,"monkeys, apes",1,2,PPPP,bird,Neornithes strigiformes,Owls,,1,1,NSSS,T,,,,
-G7,rhino,Edentate Xenarthra,Glyptodonts,,1,5,GAA,fin,Ornithischian thyracophora,"Ankylosaurs, Nodosaurs",,2,5,GAA,T,,,,
-G8,bat,Chiroptera,Bats,,1,1,NSSS,bird,Pterosaur,Flying Reptiles,"rhamphorhynchs, pterodactyls",1,1,MSSS,MP,,,,HAA`
+G7,rhino,Edentate Xenarthra,Glyptodonts,,1,5,GAA,fin,Ornithischian thyraeophora,"Ankylosaurs, Nodosaurs",,2,5,GAA,T,,,,
+G8,bat,Chiroptera,Bats,,1,1,NSSS,bird,Pterosaur,Flying Reptiles,"rhamphorhynchs, pterodactyls",1,1,MSSS,MP,,,,HA
+G9,rhino,Proboscid tethythere,Gomphotheres,elephantidea,3,5,BGPP,fin,Ornithischian thyraeophora,Stegosaurs,,1,5,BA,T,,,,
+G10,rhino,Perissodactyl ungulate,Ceratomorphs,"tapirs, rhinos",2,6,BGPP,dino,Saurischian sauropodomorph,Prosauropods,,1,4,BS,T,,,,
+G11,dolphin,Demostylia,Marine Horses,,2,4,PM,croc,Saurischian theropod,Spinosaurs,baryonyx,2,6,AM,C,Comet impact global cooling,4,FALSE,
+G12,bat,Protherian triconodont,Morganucodonts,first mammals,1,1,IN,fin,Anapsid chelonian,Turtles,,1,4,AA,MP,,,,HA
+G13,rhino,Perissodactyl ungulate,Hippomorphs,"horses, brontotheres",1,5,GS,dino,Ornithischian marginocephalian,Bone Head Dinosaurs,pachycephalosaurs,1,4,GS,T,,,,
+G14,bat,Insectovore,"Shrews, Moles",,1,1,IN,bird,Avian palaeognathaen,Ratites,,1,3,BS,C,Oceanic H2S burp global warming,5,TRUE,
+G15,bat,Cimolesta,"Taeniodonts, Tillodonts",,1,3,HN,bird,Columbiform neornithes,Doves,"pigeons, doves",1,1,HSSS,T,,,,
+G16,dolphin,Odontoceti cetacean,Dolphins,toothed whales,2,6,PPMM,croc,Diapsid reptile,Plesiosaurs,,1,5,MM,MT,,,,J
+G17,rhino,Artodactyl ungulate,Tylopods,"camels, oreodonts",1,3,BG,dino,Ornithischian ornithopod,Hypsilophodonts,,1,3,BS,T,,,,
+G18,bat,Hyracoidea,Hyraxes,,1,2,HN,fin,Crurotarsi,Rauisuchians,,1,3,AS,T,,,,
+G19,rhino,Perissodactyl ungulate,Chalicotheres,,1,4,BA,dino,Saurischian sauropodomorph,Brontosaurs,"brachiosaurs, diplodocus",4,6,BB,T,,,,
+G20,cat,Condylarthan ungulate,Mesonychids,,1,3,AA,dino,Saurischian theropod,Carnosaurs,"allosaurs, tyrannosaurus",1,5,AA,T,,,,
+G21,bat,Glires,Rodents,"mice, squirrels, porcupines",1,1,HN,bird,Passeriform neornithes,Perching Birds,,1,1,ISSS,ME,,,,T
+G22,rhino,Artodactyl ungulate,Pecoran Ruminants,"deer, pronghorn, giraffe, cattle",1,4,BG,fin,Ornithischian marginocephalian,Ceratopsians,horned dinosaurs,2,5,BGGA,T,,,,
+G23,dolphin,Carnivora,Pinnipeds,"seals, sea lions, walrus",1,3,PM,bird,Avian pygostylian,Enantiornithines,,1,1,PSSS,T,,,,
+G24,cat,Creodonta,Creodonts,,1,3,AS,dino,Saurischian theropod,Ceratosaurs,"coelophysis, dilophosaurs",1,4,AS,T,,,,
+G25,cat,Carnivora,Canoids,"dogs, bears, bear-dogs",1,3,PS,dino,Saurischian theropod,Deinonychosaurs,"dromaeosaurs, troodonts",1,3,AS,T,,,,
+G26,bat,Glires,Lagomorphs,rabbits,1,1,GS,croc,Crurotarsi,Phytosaurs,,1,3,AM,MP,,,,HA`
