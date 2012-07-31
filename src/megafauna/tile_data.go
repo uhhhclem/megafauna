@@ -199,6 +199,32 @@ func parseimmigrantTiles(r io.Reader, tiles map[string]*Tile) error {
 	return nil
 }
 
+// GetInheritanceTiles parses the inheritance tile data and returns a slice containing the 5 inheritance tiles. 
+func GetInheritanceTiles() []*InheritanceTile {
+	r := strings.NewReader(inheritanceTileSourceData)
+	csvReader := csv.NewReader(r)
+	records, _ := csvReader.ReadAll()
+	result := make([]*InheritanceTile, 0)
+	for _, record := range records {
+		t := new(InheritanceTile)
+		ob := new(InheritanceTileData)
+		re := new(InheritanceTileData)
+		t.Obverse = ob
+		t.Reverse = re
+		
+		ob.MinSize, _ = strconv.Atoi(record[0])
+		ob.MaxSize, _ = strconv.Atoi(record[1])
+		ob.DNA = MakeDNASpec(record[2])
+		
+		re.MinSize, _ = strconv.Atoi(record[3])
+		re.MaxSize, _ = strconv.Atoi(record[4])
+		re.DNA = MakeDNASpec(record[5])
+		
+		result = append(result, t)
+	}
+	return result
+}
+	
 const biomeTileSourceData = `MA16,TRUE,A,16,L,Deciduous Gymnosperm,Polar Forest,BB,H,N,TRUE,FALSE,FALSE,FALSE
 MA20,TRUE,A,20,L,Cordaites,Broadleaf Conifer Forest,BB,,size,FALSE,FALSE,FALSE,FALSE
 MA30,TRUE,A,30,L,Gingkophytes,Ginkgo Woodland,B,,P,TRUE,FALSE,FALSE,FALSE
@@ -253,3 +279,9 @@ M13,TRUE,T,FALSE,TRUE,,PAMM,Diapsid thracophra,Pliosaurs
 M14,TRUE,T,FALSE,TRUE,,AAMM,Diapsid lizard,Mosasaurs
 M15,TRUE,T,TRUE,TRUE,,MNN,Lissamphibian capotosaur,Labyrinthodonts
 M16,TRUE,T,TRUE,TRUE,,AAM,Mesosuchian sebecid,Terrestrial crocodiles`
+
+const inheritanceTileSourceData=`1,2,H,1,4,B
+1,6,G,1,6,GG
+1,2,I,1,6,G
+1,4,B,4,6,BB
+1,6,P,1,6,PP`

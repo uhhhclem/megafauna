@@ -42,3 +42,15 @@ func (t *Tile) IsBiomeTile() bool {
 func (t *Tile) IsImmigrantTile() bool {
 	return t.ImmigrantData != nil
 }
+
+// InheritanceTile represents the inheritance tiles, which aren't Tiles for any game purpose.
+type InheritanceTile struct {
+	Obverse *InheritanceTileData
+	Reverse *InheritanceTileData
+}
+
+type InheritanceTileData struct {
+	MinSize int
+	MaxSize int
+	DNA *DNASpec
+}

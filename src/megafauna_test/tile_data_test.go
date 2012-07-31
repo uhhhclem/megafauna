@@ -107,3 +107,20 @@ func checkImmigrantTiles(t *testing.T, tiles map[string]*megafauna.Tile) {
 		t.Error("Tile M16 is wrong.")
 	}
 }
+
+func TestGetInheritanceTiles(t *testing.T) {
+
+	tiles := megafauna.GetInheritanceTiles()
+	if len(tiles) != 5 {
+		t.Error("We should have gotten five inheritance tiles.")
+		return
+	}
+	tile := tiles[4]
+	if tile.Obverse.MinSize != 1 || tile.Obverse.MaxSize != 6 || tile.Obverse.DNA.Spec != "P" {
+		t.Error("Obverse data is wrong for inheritance tile 5.")
+	}
+	if tile.Reverse.MinSize != 1 || tile.Reverse.MaxSize != 6 || tile.Reverse.DNA.Spec != "PP" {
+		t.Error("Reverse data is wrong for inheritance tile 5.")
+	}
+	
+}

@@ -15,7 +15,10 @@ var (
 // Game is one discrete game of Bios Megafauna.
 type Game struct {
 	Players SortablePlayerCollection // slice of Player objects, in player order
+	Board *Board // the game's board
+	//
 	// card-related fields
+	//
 	Cards                map[string]*Card
 	CardKeys             []string // shuffled slice of keys to all cards
 	TriassicCardKeys     []string
@@ -25,10 +28,13 @@ type Game struct {
 	UpperDisplayCardKeys []string
 	LowerDisplayCardKeys []string
 	LowerDisplayGenes    []int
+	//
 	// tile-related fields
+	//
 	Tiles            map[string]*Tile
 	MesozoicTileKeys []string // shuffled slice of keys to the Mesozoic tiles.
 	CenozoicTileKeys []string // shuffled slice of keys to the Cenozoic tiles.
+	TarpitTileKeys   []string // keys of the Tiles in the Tarpit.
 }
 
 // SortablePlayerCollection is used to sort Players by Dentition.
@@ -54,6 +60,7 @@ func NewGame(names []string) (*Game, error) {
 	var err error
 
 	g := new(Game)
+	g.Board = NewBoard()
 	g.createPlayers(names)
 	if g.Players == nil {
 		return nil, ErrInvalidPlayers
@@ -80,6 +87,7 @@ func (g *Game) createPlayers(names []string) {
 	for index, name := range names {
 		p := new(Player)
 		p.Name = name
+		p.InheritanceTiles = GetInheritanceTiles()
 		players[index] = p
 	}
 
@@ -199,6 +207,7 @@ type Player struct {
 	Species      []*Species // the players' species
 	Genes        int        // number of genes the player currently has
 	AnimalTokens []int      // number of animal tokens (of silhouettes 0-3) are in the player's supply
+	InheritanceTiles []*InheritanceTile // the player's supply of unused inheritance tiles
 }
 
 // String formats a Player for display.
