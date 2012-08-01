@@ -217,5 +217,14 @@ func (b *Board) FindLowestClimax(latitudeKey string) (*Habitat, error) {
 // PlaceTileOnBoard looks at the tile's Latitude, and then finds the Habitats for that Latitude, 
 // and among those chooses the one that has the lowest climax number.
 func (b *Board) PlaceTileOnBoard(t *Tile) (*Tile, error) {
+	climax, err := b.FindLowestClimax(t.LatitudeKey)
+	if err == nil {
+		return nil, ErrInvalidLatitudeKey
+	}
+	if t.IsBiomeTile() {
+		displacedTile := climax.Biome.Tile
+		// swap the existing biome for the new one
+		return displacedTile, nil
+	}
 	return nil, nil
 }
