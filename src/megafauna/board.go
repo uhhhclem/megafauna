@@ -212,3 +212,7 @@ func (b *Board) FindLowestClimax(latitudeKey string) (*Habitat, error) {
 	}
 	return result, nil
 }
+
+func (b *Board) PlaceTileOnBoard(t *Tile) (error) {
+	return nil
+}
