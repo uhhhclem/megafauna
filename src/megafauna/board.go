@@ -213,7 +213,9 @@ func (b *Board) FindLowestClimax(latitudeKey string) (*Habitat, error) {
 	return result, nil
 }
 
-// PlaceTileOnBoard places a tile on the board, and can return a displaced tile
+// PlaceTileOnBoard places a tile on the board, and can return a displaced tile.
+// PlaceTileOnBoard looks at the tile's Latitude, and then finds the Habitats for that Latitude, 
+// and among those chooses the one that has the lowest climax number.
 func (b *Board) PlaceTileOnBoard(t *Tile) (*Tile, error) {
 	return nil, nil
 }
