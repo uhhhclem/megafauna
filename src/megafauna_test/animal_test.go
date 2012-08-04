@@ -7,8 +7,8 @@ import (
 
 func TestHerbivoreContestBasicTests(t *testing.T) {
 	// animal1 is suited, animal2 is not
-	animal1 := megafauna.Animal{2, 2, megafauna.MakeDNASpec("BBG")}
-	animal2 := megafauna.Animal{3, 2, megafauna.MakeDNASpec("IIM")}
+	animal1 := megafauna.Animal{2, 2, megafauna.MakeDNASpec("BBG"), nil, 0}
+	animal2 := megafauna.Animal{3, 2, megafauna.MakeDNASpec("IIM"), nil, 0}
 
 	h := new(megafauna.HerbivoreContest)
 	h.Animals = []*megafauna.Animal{&animal1, &animal2}
@@ -27,7 +27,7 @@ func TestHerbivoreContestBasicTests(t *testing.T) {
 	}
 
 	// now animal2 is suited, and it's bigger, and this is a size niche
-	animal2 = megafauna.Animal{3, 3, megafauna.MakeDNASpec("BB")}
+	animal2 = megafauna.Animal{3, 3, megafauna.MakeDNASpec("BB"), nil, 0}
 	result = h.FindWinner()
 	if result != &animal2 {
 		t.Errorf("Scores were: %v", h.Scores)
@@ -35,7 +35,7 @@ func TestHerbivoreContestBasicTests(t *testing.T) {
 	}
 
 	// now animal2 is suited, and this is an "I" niche
-	animal2 = megafauna.Animal{3, 2, megafauna.MakeDNASpec("BBI")}
+	animal2 = megafauna.Animal{3, 2, megafauna.MakeDNASpec("BBI"), nil, 0}
 	h.Niche, err = megafauna.MakeNiche("I")
 	if err != nil {
 		t.Error(err)
@@ -58,7 +58,7 @@ func TestHerbivoreContestBasicTests(t *testing.T) {
 	}
 
 	// now they're both the same size (and it's a Size niche), but animal2 has more teeth
-	animal2 = megafauna.Animal{3, 2, megafauna.MakeDNASpec("BB")}
+	animal2 = megafauna.Animal{3, 2, megafauna.MakeDNASpec("BB"), nil, 0}
 	h.Niche, err = megafauna.MakeNiche("Size")
 	if err != nil {
 		t.Error(err)

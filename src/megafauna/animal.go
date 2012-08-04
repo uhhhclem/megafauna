@@ -5,27 +5,21 @@ import (
 	"sort"
 )
 
+// Reverse embeds a sort.Interface value and implements a reverse sort over
+// that value.
+type Reverse struct {
+	// This embedded Interface permits Reverse to use the methods of
+	// another Interface implementation.
+	sort.Interface
+}
+
 // Animal can be either an immigrant or a player's species.
 type Animal struct {
-	Dentition int
-	Size      int
-	Genome    *DNASpec
-}
-
-// Immigrant represents an immigrant tile.
-type Immigrant struct {
-	Animal
-	Title    string
-	Subtitle string
-	Latitude *Latitude
-	IsLand   bool
-	IsSea    bool
-}
-
-// Species represents one of the player's four species
-type Species struct {
-	Animal
-	Silhouette int // the silhouette (0-3) chosen for this species
+	Dentition     int
+	Size          int
+	Genome        *DNASpec
+	ImmigrantTile *Tile // if nil, this is a player species (also, dentition must be 2-5)
+	Silhouette    int   // if a player species, the silhouette (0-3) chosen for this species
 }
 
 // HerbivoreContest is used to determine the winner of herbivore contests during the cull.  Set Animals, Requirements, 
@@ -51,14 +45,6 @@ func (h HerbivoreContest) Swap(i, j int) {
 // Less is part of the sort.Interface interface.
 func (h HerbivoreContest) Less(i, j int) bool {
 	return h.Scores[i] < h.Scores[j]
-}
-
-// Reverse embeds a sort.Interface value and implements a reverse sort over
-// that value.
-type Reverse struct {
-	// This embedded Interface permits Reverse to use the methods of
-	// another Interface implementation.
-	sort.Interface
 }
 
 // Less returns the opposite of the embedded implementation's Less method.
@@ -107,4 +93,51 @@ func (h *HerbivoreContest) FindWinner() *Animal {
 
 	// nobody has a score of over 100; valar morghulis.
 	return nil
+}
+
+// CarnivoreContest is used to determine the winner of carnivore contests during the cull.  Set Carnivores,
+// and Prey (which will have 0, 1, or 2 members), and call FindWinners to find out which
+// (if any) carnivores survive.
+type CarnivoreContest struct {
+	Carnivores []*Animal
+	Scores     []int
+	Prey       []*Animal
+}
+
+// FindWinner finds the winner(s) (if any) of a carnivore contest. 
+func (contest *CarnivoreContest) FindWinner() []*Animal {
+
+	result := make([]*Animal, 0)
+
+	suitablePrey := make(map[*Animal][]*Animal)
+	for _, c := range contest.Carnivores {
+		prey := make([]*Animal, 0)
+		for _, p := range contest.Prey {
+			if c.canFeedOn(p) {
+				prey = append(prey, p)
+			}
+		}
+		suitablePrey[c] = prey
+	}
+
+	return result
+}
+
+// canFeedOn indicates whether or not prey is suitable for the carnivore
+func (carnivore *Animal) canFeedOn(prey *Animal) bool {
+
+	// no cannibalism!
+	if carnivore.Dentition > 1 && carnivore.Dentition < 6 && carnivore.Dentition == prey.Dentition {
+		if carnivore.Silhouette == prey.Silhouette {
+			return false
+		}
+	}
+
+	// too big or too small!
+	if carnivore.Size < prey.Size-1 || carnivore.Size > prey.Size+1 {
+		return false
+	}
+
+	// can you catch me?
+	return carnivore.Genome.CanFeedOn(prey.Genome)
 }

@@ -196,7 +196,7 @@ type Player struct {
 	Color            string             // the player's color
 	Dentition        int                // how many teeth the player has
 	IsDinosaur       bool               // indicates if the player species are dinosaurs or mammals
-	Species          []*Species         // the players' species
+	Species          [][]*Animal        // the player's animals, indexed by silhouette (0-3)
 	Genes            int                // number of genes the player currently has
 	AnimalTokens     []int              // number of animal tokens (of silhouettes 0-3) are in the player's supply
 	HomelandTile     *Tile              // the player's homeland tile
@@ -214,7 +214,10 @@ func NewPlayer(name string, dentition int) *Player {
 	colors := []string{"Red", "Orange", "Green", "White"}
 	p.Color = colors[p.Dentition-2]
 	p.IsDinosaur = p.Dentition == 2 || p.Dentition == 4
-	p.Species = make([]*Species, 4)
+	p.Species = make([][]*Animal, 4)
+	for i := 0; i < 3; i++ {
+		p.Species[i] = make([]*Animal, 8)
+	}
 	p.AnimalTokens = []int{8, 8, 8, 8}
 	p.InheritanceTiles = GetInheritanceTiles()
 
