@@ -68,6 +68,14 @@ func (d *DNASpec) CanPreyOn(other *DNASpec) bool {
 	return true
 }
 
+// GetDNAValue gets the number of DNA of a given kind that are in the DNASpec
+func (d *DNASpec) GetDNAValue(kind string) int {
+	if not d.Breakdown[kind] {
+		return 0
+	}
+	return d.Breakdown[kind].Value
+}
+
 // CanFeedOn determines whether or not an animal with this DNASpec can feed on something - i.e.
 // if an herbivore can feed in a biome.  It returns false if the other DNASpec has any dietary DNA 
 // that this one doesn't, or whose Value exceeds this one's.

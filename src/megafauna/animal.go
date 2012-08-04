@@ -100,27 +100,28 @@ func (h *HerbivoreContest) FindWinner() *Animal {
 // (if any) carnivores survive.
 type CarnivoreContest struct {
 	Carnivores []*Animal
-	Scores     []int
 	Prey       []*Animal
 }
 
-// FindWinner finds the winner(s) (if any) of a carnivore contest. 
-func (contest *CarnivoreContest) FindWinner() []*Animal {
+// FindWinners finds the winner(s) (if any) of a carnivore contest. 
+func (contest *CarnivoreContest) FindWinners() []*Animal {
 
-	result := make([]*Animal, 0)
+	winners := make([]*Animal, 0)
 
-	suitablePrey := make(map[*Animal][]*Animal)
-	for _, c := range contest.Carnivores {
-		prey := make([]*Animal, 0)
-		for _, p := range contest.Prey {
+	for _, p := range contest.Prey {
+		feeders = make([]*Animal)
+		for _, c := range contest.Carnivores {
 			if c.canFeedOn(p) {
-				prey = append(prey, p)
+				feeders = append(feeders, c)
 			}
 		}
-		suitablePrey[c] = prey
+		// if anyone can feed on this prey, find out which one actually wins
+		if len(feeders) > 0 {
+			winners = winners.append(result, findWinningCarnivore(feeders)
+		}
 	}
 
-	return result
+	return winners
 }
 
 // canFeedOn indicates whether or not prey is suitable for the carnivore
@@ -140,4 +141,28 @@ func (carnivore *Animal) canFeedOn(prey *Animal) bool {
 
 	// can you catch me?
 	return carnivore.Genome.CanFeedOn(prey.Genome)
+}
+
+// findWinningCarnivore finds the one highest-scoring carnivore among those that can eat a specific prey.
+func findWinningCarnivore(carnivores *[]Animal) {
+	var winner *Animal
+	winningP := 0
+	winningDentition := 10
+	for _, c := range carnivores {
+	
+		// who has the most P DNA?
+		p := c.Genome.GetValue("P")
+		if p < winningP {
+			continue
+		}
+		winningP = p
+		
+		// among those, who has the fewest teeth?
+		if c.Dentition > winningDentition {
+			continue
+		}
+		winningDentition = c.Dentition
+		winner = c
+	}
+	return winner
 }
