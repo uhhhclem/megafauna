@@ -103,21 +103,37 @@ type CarnivoreContest struct {
 	Prey       []*Animal
 }
 
-// FindWinners finds the winner(s) (if any) of a carnivore contest. 
+// FindWinners finds the winner(s) (if any) of a carnivore contest.  The slice it returns may be
+// empty, in which case no carnivores found suitable prey.
+//
+// The rules are very clear about prey suitability and competition between carnivores if there's
+// only one herbivore in the biome.  What they're not clear on is what to do if there are two.
+// For instance, if there are three carnivores, C1, C2, and C3, what happens if they rank like
+// this for the two prey?
+//
+//   P1 : C1, C2
+//   P2 : C1, C3
+//
+// The rules don't tell you which prey C1 eats.  And the one he eats determines whether C2 or C3
+// will survive.  I've got a question in at BGG to see if player choice enters into this question.
+// I hope it doesn't!  (If it doesn't, we say that C1, C2, and C3 all have suitable prey, and the
+// winners are the ones with the most P/fewest teeth.)
+
 func (contest *CarnivoreContest) FindWinners() []*Animal {
 
 	winners := make([]*Animal, 0)
 
 	for _, p := range contest.Prey {
-		feeders = make([]*Animal)
+		// find out which carnivores can feed on this prey.
+		feeders := make([]*Animal, 0)
 		for _, c := range contest.Carnivores {
 			if c.canFeedOn(p) {
 				feeders = append(feeders, c)
 			}
 		}
-		// if anyone can feed on this prey, find out which one actually wins
+		// if anyone can feed on this prey, find out which one actually wins.
 		if len(feeders) > 0 {
-			winners = winners.append(result, findWinningCarnivore(feeders)
+			winners = append(winners, findWinningCarnivore(feeders))
 		}
 	}
 
@@ -128,8 +144,8 @@ func (contest *CarnivoreContest) FindWinners() []*Animal {
 func (carnivore *Animal) canFeedOn(prey *Animal) bool {
 
 	// no cannibalism!
-	if carnivore.Dentition > 1 && carnivore.Dentition < 6 && carnivore.Dentition == prey.Dentition {
-		if carnivore.Silhouette == prey.Silhouette {
+	if carnivore.Dentition > 1 && carnivore.Dentition < 6 {
+		if carnivore.Dentition == prey.Dentition && carnivore.Silhouette == prey.Silhouette {
 			return false
 		}
 	}
@@ -144,19 +160,20 @@ func (carnivore *Animal) canFeedOn(prey *Animal) bool {
 }
 
 // findWinningCarnivore finds the one highest-scoring carnivore among those that can eat a specific prey.
-func findWinningCarnivore(carnivores *[]Animal) {
+// This will always find a winner, even if carnivores contains only one animal with no P DNA.
+func findWinningCarnivore(carnivores []*Animal) *Animal {
 	var winner *Animal
-	winningP := 0
-	winningDentition := 10
+	winningP := 0          // the highest P DNA value we've found so far
+	winningDentition := 10 // the lowest dentition we've found so far.
 	for _, c := range carnivores {
-	
+
 		// who has the most P DNA?
-		p := c.Genome.GetValue("P")
+		p := c.Genome.GetDNAValue("P")
 		if p < winningP {
 			continue
 		}
 		winningP = p
-		
+
 		// among those, who has the fewest teeth?
 		if c.Dentition > winningDentition {
 			continue

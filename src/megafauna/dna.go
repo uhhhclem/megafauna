@@ -70,7 +70,7 @@ func (d *DNASpec) CanPreyOn(other *DNASpec) bool {
 
 // GetDNAValue gets the number of DNA of a given kind that are in the DNASpec
 func (d *DNASpec) GetDNAValue(kind string) int {
-	if not d.Breakdown[kind] {
+	if d.Breakdown[kind] == nil {
 		return 0
 	}
 	return d.Breakdown[kind].Value
