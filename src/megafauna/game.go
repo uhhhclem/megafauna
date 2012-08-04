@@ -12,6 +12,26 @@ var (
 	ErrInvalidPlayers = errors.New("Invalid player list.")
 )
 
+var playerColors = []string{"Red", "Orange", "Green", "White"}
+
+// SortablePlayerCollection is used to sort Players by Dentition.
+type SortablePlayerCollection []*Player
+
+// Len returns the length of a SortablePlayerCollection.
+func (p SortablePlayerCollection) Len() int {
+	return len(p)
+}
+
+// Less returns which Player in a SortablePlayerCollection has fewer teeth.
+func (p SortablePlayerCollection) Less(i, j int) bool {
+	return p[i].Dentition < p[j].Dentition
+}
+
+// Swap swaps Players in a SortablePlayerCollection. 
+func (p SortablePlayerCollection) Swap(i, j int) {
+	p[i], p[j] = p[j], p[i]
+}
+
 // Game is one discrete game of Bios Megafauna.
 type Game struct {
 	Players SortablePlayerCollection // slice of Player objects, in player order
@@ -35,24 +55,6 @@ type Game struct {
 	MesozoicTileKeys []string // shuffled slice of keys to the Mesozoic tiles.
 	CenozoicTileKeys []string // shuffled slice of keys to the Cenozoic tiles.
 	TarpitTileKeys   []string // keys of the Tiles in the Tarpit.
-}
-
-// SortablePlayerCollection is used to sort Players by Dentition.
-type SortablePlayerCollection []*Player
-
-// Len returns the length of a SortablePlayerCollection.
-func (p SortablePlayerCollection) Len() int {
-	return len(p)
-}
-
-// Less returns which Player in a SortablePlayerCollection has fewer teeth.
-func (p SortablePlayerCollection) Less(i, j int) bool {
-	return p[i].Dentition < p[j].Dentition
-}
-
-// Swap swaps Players in a SortablePlayerCollection. 
-func (p SortablePlayerCollection) Swap(i, j int) {
-	p[i], p[j] = p[j], p[i]
 }
 
 // NewGame creates a new Game and initializes the Players.
@@ -82,26 +84,17 @@ func (g *Game) createPlayers(names []string) {
 		return
 	}
 
+	// Randomly order the dentitions, so that we can randomly assign one to each player.  
+	// Shuffle takes strings, so we'll have to convert the dentitions to ints.  
+	dentitions := []string{"2", "3", "4", "5"}
+	Shuffle(dentitions)
+
 	// create and name the players
 	players := make(SortablePlayerCollection, len(names))
 	for index, name := range names {
-		p := new(Player)
-		p.Name = name
-		p.InheritanceTiles = GetInheritanceTiles()
+		dentition, _ := strconv.Atoi(dentitions[index])
+		p := NewPlayer(name, dentition)
 		players[index] = p
-	}
-
-	// Randomly assign dentitions to each player.  Shuffle takes strings, so we'll have to convert
-	// the dentitions to ints.  
-	dentitions := []string{"2", "3", "4", "5"}
-	colors := []string{"Red", "Orange", "Green", "White"}
-	Shuffle(dentitions)
-	for index, p := range players {
-		p.Dentition, _ = strconv.Atoi(dentitions[index])
-		p.Color = colors[p.Dentition-2]
-		p.IsDinosaur = p.Dentition == 2 || p.Dentition == 4
-		p.Species = make([]*Species, 4)
-		p.AnimalTokens = []int{8, 8, 8, 8}
 	}
 
 	// sort the players by Dentition
@@ -207,7 +200,23 @@ type Player struct {
 	Species      []*Species // the players' species
 	Genes        int        // number of genes the player currently has
 	AnimalTokens []int      // number of animal tokens (of silhouettes 0-3) are in the player's supply
+	HomelandTile *Tile		// the player's homeland tile
 	InheritanceTiles []*InheritanceTile // the player's supply of unused inheritance tiles
+}
+
+// NewPlayer creates a new player given the player's name and dentition.
+func NewPlayer(name string, dentition int) *Player {
+	p := new(Player)
+	
+	p.Name = name
+	p.Dentition = dentition
+	p.Color = playerColors[p.Dentition-2]
+	p.IsDinosaur = p.Dentition == 2 || p.Dentition == 4
+	p.Species = make([]*Species, 4)
+	p.AnimalTokens = []int{8, 8, 8, 8}
+	p.InheritanceTiles = GetInheritanceTiles()
+
+	return p
 }
 
 // String formats a Player for display.
