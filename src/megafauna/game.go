@@ -12,8 +12,6 @@ var (
 	ErrInvalidPlayers = errors.New("Invalid player list.")
 )
 
-var playerColors = []string{"Red", "Orange", "Green", "White"}
-
 // SortablePlayerCollection is used to sort Players by Dentition.
 type SortablePlayerCollection []*Player
 
@@ -35,7 +33,7 @@ func (p SortablePlayerCollection) Swap(i, j int) {
 // Game is one discrete game of Bios Megafauna.
 type Game struct {
 	Players SortablePlayerCollection // slice of Player objects, in player order
-	Board *Board // the game's board
+	Board   *Board                   // the game's board
 	//
 	// card-related fields
 	//
@@ -63,10 +61,6 @@ func NewGame(names []string) (*Game, error) {
 
 	g := new(Game)
 	g.Board = NewBoard()
-	g.createPlayers(names)
-	if g.Players == nil {
-		return nil, ErrInvalidPlayers
-	}
 	err = g.createCards()
 	if err != nil {
 		return nil, err
@@ -74,6 +68,10 @@ func NewGame(names []string) (*Game, error) {
 	err = g.createTiles()
 	if err != nil {
 		return nil, err
+	}
+	g.createPlayers(names)
+	if g.Players == nil {
+		return nil, ErrInvalidPlayers
 	}
 	return g, nil
 }
@@ -95,6 +93,7 @@ func (g *Game) createPlayers(names []string) {
 		dentition, _ := strconv.Atoi(dentitions[index])
 		p := NewPlayer(name, dentition)
 		players[index] = p
+		g.Tiles[p.HomelandTile.Key] = p.HomelandTile
 	}
 
 	// sort the players by Dentition
@@ -193,28 +192,72 @@ func (g *Game) GetPlayer(dentition int) *Player {
 
 // Player defines a player and his resources.
 type Player struct {
-	Name         string     // the player's name
-	Color        string     // the player's color
-	Dentition    int        // how many teeth the player has
-	IsDinosaur   bool       // indicates if the player species are dinosaurs or mammals
-	Species      []*Species // the players' species
-	Genes        int        // number of genes the player currently has
-	AnimalTokens []int      // number of animal tokens (of silhouettes 0-3) are in the player's supply
-	HomelandTile *Tile		// the player's homeland tile
+	Name             string             // the player's name
+	Color            string             // the player's color
+	Dentition        int                // how many teeth the player has
+	IsDinosaur       bool               // indicates if the player species are dinosaurs or mammals
+	Species          []*Species         // the players' species
+	Genes            int                // number of genes the player currently has
+	AnimalTokens     []int              // number of animal tokens (of silhouettes 0-3) are in the player's supply
+	HomelandTile     *Tile              // the player's homeland tile
 	InheritanceTiles []*InheritanceTile // the player's supply of unused inheritance tiles
 }
 
 // NewPlayer creates a new player given the player's name and dentition.
 func NewPlayer(name string, dentition int) *Player {
+
 	p := new(Player)
-	
+
 	p.Name = name
 	p.Dentition = dentition
-	p.Color = playerColors[p.Dentition-2]
+
+	colors := []string{"Red", "Orange", "Green", "White"}
+	p.Color = colors[p.Dentition-2]
 	p.IsDinosaur = p.Dentition == 2 || p.Dentition == 4
 	p.Species = make([]*Species, 4)
 	p.AnimalTokens = []int{8, 8, 8, 8}
 	p.InheritanceTiles = GetInheritanceTiles()
+
+	t := new(Tile)
+	b := new(BiomeTileData)
+	t.BiomeData = b
+	p.HomelandTile = t
+
+	t.Key = p.Color
+	t.HomelandPlayer = p
+	t.IsLand = true
+
+	// a homeland tile has no Requirements, just a Niche	
+	niche, err := MakeNiche(strconv.Itoa(dentition))
+	if err != nil {
+		panic(err)
+	}
+	b.Niche = niche
+	b.RedStar = true
+
+	switch dentition {
+	case 2:
+		t.Title = "Giant Myriapods"
+		t.LatitudeKey = "T"
+		b.ClimaxNumber = 58
+	case 3:
+		t.Supertitle = "Alleghenian orogeny"
+		t.Title = "Appalachian Cloud Forest"
+		t.LatitudeKey = "O"
+		b.IsOrogeny = true
+		b.ClimaxNumber = 60
+	case 4:
+		t.Supertitle = "Caytoniales"
+		t.Title = "Tree Fern-Cordaites Rainforest"
+		t.LatitudeKey = "O"
+		b.IsOrogeny = true
+		b.ClimaxNumber = 55
+	case 5:
+		t.Supertitle = "Pteridophytes"
+		t.Title = "Fern Understory"
+		t.LatitudeKey = "A"
+		b.ClimaxNumber = 75
+	}
 
 	return p
 }

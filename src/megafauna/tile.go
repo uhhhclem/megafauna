@@ -2,15 +2,16 @@ package megafauna
 
 // Tile represents a Biome or Immigrant tile.
 type Tile struct {
-	Key           string // unique identifier, defined in data
-	IsMesozoic    bool   // if false, tile is Cenozoic
-	Supertitle    string
-	Title         string
-	LatitudeKey   string             // defined in LatitudeKeys
-	IsLand        bool               // tile is a land biome or terrestrial immigrant
-	IsSea         bool               // tile is a sea biome or aquatic immigrant
-	BiomeData     *BiomeTileData     // if present, this is a biome tile
-	ImmigrantData *ImmigrantTileData // if present, this is an immigrant tile
+	Key            string  // unique identifier, defined in data
+	HomelandPlayer *Player // if not nil, tile is a homeland tile for the player.
+	IsMesozoic     bool    // ignore if HomelandPlayer; otherwise, if false, tile is Cenozoic
+	Supertitle     string
+	Title          string
+	LatitudeKey    string             // defined in LatitudeKeys
+	IsLand         bool               // tile is a land biome or terrestrial immigrant
+	IsSea          bool               // tile is a sea biome or aquatic immigrant
+	BiomeData      *BiomeTileData     // if present, this is a biome tile
+	ImmigrantData  *ImmigrantTileData // if present, this is an immigrant tile
 }
 
 // BiomeTileData contains the data for biome Tiles.
@@ -52,5 +53,5 @@ type InheritanceTile struct {
 type InheritanceTileData struct {
 	MinSize int
 	MaxSize int
-	DNA *DNASpec
+	DNA     *DNASpec
 }

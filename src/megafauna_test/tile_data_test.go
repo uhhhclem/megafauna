@@ -122,5 +122,5 @@ func TestGetInheritanceTiles(t *testing.T) {
 	if tile.Reverse.MinSize != 1 || tile.Reverse.MaxSize != 6 || tile.Reverse.DNA.Spec != "PP" {
 		t.Error("Reverse data is wrong for inheritance tile 5.")
 	}
-	
+
 }

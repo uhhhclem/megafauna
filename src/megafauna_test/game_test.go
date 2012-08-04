@@ -104,7 +104,7 @@ func TestNewGame_Players(t *testing.T) {
 	if len(g.Cards) != stacks {
 		t.Errorf("There are %v keys in Cards but %v in the stacks.", len(g.Cards), stacks)
 	}
-	if len(g.MesozoicTileKeys)+len(g.CenozoicTileKeys) != len(g.Tiles) {
+	if len(g.MesozoicTileKeys)+len(g.CenozoicTileKeys)+len(g.Players) != len(g.Tiles) {
 		t.Error("Tile keys and Tiles aren't the same length.")
 	}
 }
